@@ -8,6 +8,7 @@ import os
 from fastapi.responses import HTMLResponse
 from data_population.main_populator import run_population
 from app.api.endpoints.roles import router as roles_router
+from app.api.endpoints.users import router as users_router
 
 
 def create_app():
@@ -26,6 +27,7 @@ def create_app():
 
     # Routes
     app.include_router(roles_router, prefix="/api/roles", tags=["roles"])
+    app.include_router(users_router, prefix="/api/users", tags=["users"])
 
     # Create database tables
     Base.metadata.create_all(bind=engine)
