@@ -10,6 +10,7 @@ __pycache__/
 
 # Environment variables
 .env
+r_env
 
 # IDE specific files
 .vscode/
@@ -25,3 +26,4 @@ __pycache__/
 .DS_Store
 Thumbs.db
 *.db
+
