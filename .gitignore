@@ -1,5 +1,5 @@
 # Virtual environment
-v_env/
+r_env/
 
 # Python cache files
 __pycache__/
@@ -10,7 +10,6 @@ __pycache__/
 
 # Environment variables
 .env
-r_env
 
 # IDE specific files
 .vscode/
@@ -26,4 +25,36 @@ r_env
 .DS_Store
 Thumbs.db
 *.db
+
+
+# Frontend ignores
+# dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
