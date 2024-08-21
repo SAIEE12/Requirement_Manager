@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from . import database
@@ -14,6 +15,14 @@ from app.api.endpoints.auth import router as auth_router
 
 def create_app():
     app = FastAPI()
+
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # This is the default URL for Create React App
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
     # Get the directory of the current file
     current_dir = os.path.dirname(os.path.realpath(__file__))
