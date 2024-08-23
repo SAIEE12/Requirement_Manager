@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import { login, clearError } from '../store/slices/authSlice';
+import { loginSuccess, loginFailure, clearError } from '../store/slices/authSlice';
 import { RootState, AppDispatch } from '../store/store';
+import { login } from '../services/auth';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -10,13 +11,22 @@ const LoginPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(login({ username, password }));
+    try {
+      const response = await login({ username, password });
+      if (response && response.access_token) {
+        dispatch(loginSuccess({ token: response.access_token }));
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      dispatch(loginFailure(error instanceof Error ? error.message : 'An unknown error occurred'));
+    }
   };
 
   useEffect(() => {
-    // Clear any existing errors when the component mounts
     dispatch(clearError());
   }, [dispatch]);
 
@@ -69,7 +79,7 @@ const LoginPage: React.FC = () => {
           </Button>
           {error && (
             <Typography color="error" align="center">
-              {typeof error === 'string' ? error : JSON.stringify(error)}
+              {error}
             </Typography>
           )}
         </Box>
