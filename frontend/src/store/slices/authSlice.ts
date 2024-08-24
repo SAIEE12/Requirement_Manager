@@ -9,66 +9,56 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  token: null,
-  isAuthenticated: false,
+  token: localStorage.getItem('token'),
+  isAuthenticated: !!localStorage.getItem('token'),
   loading: false,
   error: null,
 };
 
 export const login = createAsyncThunk(
-    'auth/login',
-    async (credentials: { username: string; password: string }, { rejectWithValue }) => {
-      try {
-        const response = await loginApi(credentials);
-        return response;
-      } catch (error: any) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          return rejectWithValue(error.response.data);
-        } else if (error.request) {
-          // The request was made but no response was received
-          return rejectWithValue('No response received from server');
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          return rejectWithValue('Error setting up the request');
-        }
+  'auth/login',
+  async (credentials: { username: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await loginApi(credentials);
+      return response;
+    } catch (error: any) {
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      } else if (error.request) {
+        return rejectWithValue('No response received from server');
+      } else {
+        return rejectWithValue('Error setting up the request');
       }
     }
-  );
+  }
+);
 
-  export const checkAuth = createAsyncThunk(
-    'auth/checkAuth',
-    async (_, { rejectWithValue }) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        // Here you would typically validate the token with your backend
-        // For now, we'll just assume it's valid if it exists
-        return { token };
-      }
-      return rejectWithValue('No token found');
+export const checkAuth = createAsyncThunk(
+  'auth/checkAuth',
+  async (_, { rejectWithValue }) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Here you would typically validate the token with your backend
+      // For now, we'll just assume it's valid if it exists
+      return { token };
     }
-  );
+    return rejectWithValue('No token found');
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginSuccess: (state, action) => {
-      state.isAuthenticated = true;
+    setCredentials: (state, action: PayloadAction<{ token: string }>) => {
       state.token = action.payload.token;
-      state.loading = false;
-      state.error = null;
-    },
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.isAuthenticated = false;
-      state.token = null;
-      state.loading = false;
-      state.error = action.payload;
+      state.isAuthenticated = true;
+      localStorage.setItem('token', action.payload.token);
     },
     logout: (state) => {
       state.token = null;
       state.isAuthenticated = false;
+      localStorage.removeItem('token');
     },
     clearError: (state) => {
       state.error = null;
@@ -84,14 +74,22 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.token = action.payload.access_token;
+        localStorage.setItem('token', action.payload.access_token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
+        state.token = action.payload.token;
+      })
+      .addCase(checkAuth.rejected, (state) => {
+        state.isAuthenticated = false;
+        state.token = null;
       });
   },
 });
 
-export const { loginSuccess, loginFailure, logout, clearError } = authSlice.actions;
-
+export const { setCredentials, logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

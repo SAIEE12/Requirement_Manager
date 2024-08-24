@@ -1,30 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import { loginSuccess, loginFailure, clearError } from '../store/slices/authSlice';
+import { login, clearError, setCredentials } from '../store/slices/authSlice';
 import { RootState, AppDispatch } from '../store/store';
-import { login } from '../services/auth';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
+  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await login({ username, password });
-      if (response && response.access_token) {
-        dispatch(loginSuccess({ token: response.access_token }));
-      } else {
-        throw new Error('Invalid response from server');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      dispatch(loginFailure(error instanceof Error ? error.message : 'An unknown error occurred'));
+      const result = await dispatch(login({ username, password })).unwrap();
+      dispatch(setCredentials({ token: result.access_token }));
+      // Redirect to dashboard or home page here
+    } catch (err) {
+      // Error is handled by the login thunk, no need for additional error handling here
     }
   };
+
 
   useEffect(() => {
     dispatch(clearError());

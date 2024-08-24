@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Typography, Drawer, List, ListItemButton, ListItemIcon, ListItemText, InputBase, Avatar, AppBar, Toolbar, Paper } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Box, Typography, Drawer, List, ListItemButton, ListItemIcon, ListItemText, InputBase, Avatar, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -9,7 +10,9 @@ import SearchIcon from '@mui/icons-material/Search';
 
 const drawerWidth = 240;
 
-const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
+const StyledListItemButton = styled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== 'component' && prop !== 'to'
+})<{ component?: React.ElementType; to?: string }>(({ theme }) => ({
   '&:hover': {
     backgroundColor: '#ffffff',
     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
@@ -25,11 +28,14 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
 }));
 
 const Sidebar = () => {
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-
-  const handleListItemClick = (index: number) => {
-    setSelectedIndex(index);
-  };
+  const location = useLocation();
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Department', icon: <BusinessIcon />, path: '/department' },
+    { text: 'Clients', icon: <BusinessIcon />, path: '/clients' },
+    { text: 'Employee', icon: <PeopleIcon />, path: '/employee' },
+    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+  ];
 
   return (
     <Drawer
@@ -54,16 +60,12 @@ const Sidebar = () => {
         </Typography>
       </Box>
       <List>
-        {[
-          { text: 'Dashboard', icon: <DashboardIcon /> },
-          { text: 'Department', icon: <BusinessIcon /> },
-          { text: 'Employee', icon: <PeopleIcon /> },
-          { text: 'Settings', icon: <SettingsIcon /> },
-        ].map((item, index) => (
+        {menuItems.map((item) => (
           <StyledListItemButton
             key={item.text}
-            selected={selectedIndex === index}
-            onClick={() => handleListItemClick(index)}
+            component={RouterLink}
+            to={item.path}
+            selected={location.pathname === item.path}
           >
             <ListItemIcon sx={{ color: 'inherit' }}>
               {item.icon}
@@ -77,12 +79,12 @@ const Sidebar = () => {
 };
 
 const Header = () => (
-  <Paper 
-    elevation={0} 
-    sx={{ 
-      p: 2, 
-      display: 'flex', 
-      justifyContent: 'space-between', 
+  <Paper
+    elevation={0}
+    sx={{
+      p: 2,
+      display: 'flex',
+      justifyContent: 'space-between',
       alignItems: 'center',
       borderRadius: 2,
       mb: 2
@@ -92,10 +94,10 @@ const Header = () => (
       Dashboard Overview
     </Typography>
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        bgcolor: 'background.default', 
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        bgcolor: 'background.default',
         borderRadius: 20,
         px: 2,
         mr: 2,
