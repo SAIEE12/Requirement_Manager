@@ -1,12 +1,16 @@
 import React from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { Box, Typography, Drawer, List, ListItemButton, ListItemIcon, ListItemText, InputBase, Avatar, Paper } from '@mui/material';
+import { Box, Typography, Drawer, List, ListItemButton, ListItemIcon, ListItemText, InputBase, Avatar, Paper, Button } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessIcon from '@mui/icons-material/Business';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SearchIcon from '@mui/icons-material/Search';
+import { logout } from '../store/slices/authSlice';
 
 const drawerWidth = 240;
 
@@ -78,7 +82,18 @@ const Sidebar = () => {
   );
 };
 
-const Header = () => (
+const Header = () => {
+// const Header = () => (
+
+const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+  
+  return (
   <Paper
     elevation={0}
     sx={{
@@ -109,9 +124,17 @@ const Header = () => (
         />
       </Box>
       <Avatar sx={{ width: 32, height: 32 }}>U</Avatar>
+      <Button
+          variant="outlined"
+          startIcon={<ExitToAppIcon />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
     </Box>
   </Paper>
 );
+};
 
 interface MainLayoutProps {
   children: React.ReactNode;
