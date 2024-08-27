@@ -9,6 +9,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SearchIcon from '@mui/icons-material/Search';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { logout } from '../store/slices/authSlice';
 
@@ -41,6 +42,7 @@ const Sidebar = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Clients', icon: <BusinessIcon />, path: '/clients' },
+    { text: 'Roles', icon: <AssignmentIcon />, path: '/roles' },
     { text: 'Employee', icon: <PeopleIcon />, path: '/employee' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
