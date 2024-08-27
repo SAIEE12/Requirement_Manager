@@ -43,6 +43,7 @@ const Sidebar = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Clients', icon: <BusinessIcon />, path: '/clients' },
     { text: 'Roles', icon: <AssignmentIcon />, path: '/roles' },
+    { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Employee', icon: <PeopleIcon />, path: '/employee' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];

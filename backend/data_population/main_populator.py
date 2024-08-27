@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, Base
 from data_population.role_populator import populate_roles
 from data_population.user_populator import populate_users
+from data_population.client_populator import populate_clients
 
 load_dotenv()
 NUM_USERS = int(os.getenv("NUM_USERS", 10))
@@ -16,6 +17,7 @@ NUM_USERS = int(os.getenv("NUM_USERS", 10))
 def run_population(db: Session):
     # Run all populators
     populate_roles(db)
+    populate_clients(db)
     populate_users(db, NUM_USERS)
 
 def main():
