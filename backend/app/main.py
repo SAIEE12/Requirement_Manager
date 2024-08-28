@@ -14,6 +14,7 @@ from app.api.endpoints.auth import router as auth_router
 from app.api.endpoints.clients import router as clients_router
 from app.api.endpoints.domains import router as domains_router
 from app.api.endpoints.locations import router as locations_router
+from app.api.endpoints.requirements import router as requirements_router
 
 
 def create_app():
@@ -39,6 +40,7 @@ def create_app():
 
 
     # Routes
+    app.include_router(requirements_router, prefix="/api/requirements", tags=["requirements"])
     app.include_router(roles_router, prefix="/api/roles", tags=["roles"])
     app.include_router(users_router, prefix="/api/users", tags=["users"])
     app.include_router(auth_router, prefix="/api/auth", tags=["auth"])

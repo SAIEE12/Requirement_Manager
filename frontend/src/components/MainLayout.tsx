@@ -40,7 +40,7 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Clients', icon: <BusinessIcon />, path: '/clients' },
@@ -48,6 +48,7 @@ const Sidebar = () => {
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Domains', icon: <DomainIcon />, path: '/domains' },
     { text: 'Locations', icon: <LocationOnIcon />, path: '/locations' },
+    { text: 'Requirements', icon: <AssignmentIcon />, path: '/requirements' }, // New menu item
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
@@ -94,10 +95,18 @@ const Sidebar = () => {
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+  };
+
+  // Function to get the title based on the current path
+  const getTitle = () => {
+    const path = location.pathname.split('/')[1];
+    if (path === '') return 'Dashboard Overview';
+    return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
   return (
@@ -113,7 +122,7 @@ const Header = () => {
       }}
     >
       <Typography variant="h6" component="div">
-        Dashboard Overview
+        {getTitle()}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box sx={{
