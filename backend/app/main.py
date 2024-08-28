@@ -12,6 +12,7 @@ from app.api.endpoints.roles import router as roles_router
 from app.api.endpoints.users import router as users_router
 from app.api.endpoints.auth import router as auth_router
 from app.api.endpoints.clients import router as clients_router
+from app.api.endpoints.domains import router as domains_router
 
 
 def create_app():
@@ -41,6 +42,7 @@ def create_app():
     app.include_router(users_router, prefix="/api/users", tags=["users"])
     app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
     app.include_router(clients_router, prefix="/api/clients", tags=["clients"])
+    app.include_router(domains_router, prefix="/api/domains", tags=["domains"])
 
     # Create database tables
     Base.metadata.create_all(bind=engine)
