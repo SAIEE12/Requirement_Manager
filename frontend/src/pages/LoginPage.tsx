@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, CircularProgress } from '@mui/material';
 import { login, clearError, setCredentials } from '../store/slices/authSlice';
 import { RootState, AppDispatch } from '../store/store';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -18,21 +19,35 @@ const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    // Clear any existing errors when the component mounts
+    dispatch(clearError());
+  }, [dispatch]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
       const result = await dispatch(login({ username, password })).unwrap();
       dispatch(setCredentials({ token: result.access_token }));
-      // Redirect to dashboard or home page here
+      navigate('/');
     } catch (err) {
-      // Error is handled by the login thunk, no need for additional error handling here
+      console.error('Login failed:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-
-  useEffect(() => {
-    dispatch(clearError());
-  }, [dispatch]);
+  const getErrorMessage = () => {
+    if (!error) return null;
+    if (typeof error === 'string') return error;
+    if (typeof error === 'object' && 'detail' in error) {
+      return error.detail;
+    }
+    return 'An unknown error occurred';
+  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -59,6 +74,7 @@ const LoginPage: React.FC = () => {
             autoFocus
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={isSubmitting}
           />
           <TextField
             margin="normal"
@@ -71,19 +87,24 @@ const LoginPage: React.FC = () => {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
+            disabled={isSubmitting || loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {isSubmitting || loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Sign In'
+            )}
           </Button>
           {error && (
             <Typography color="error" align="center">
-              {error}
+              {getErrorMessage()}
             </Typography>
           )}
         </Box>

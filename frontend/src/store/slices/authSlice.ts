@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login as loginApi } from '../../services/auth';
 
+type AuthError = string | { detail: string } | null;
+
 interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  error: string | null;
+  error: AuthError;
 }
 
 const initialState: AuthState = {
@@ -22,12 +24,12 @@ export const login = createAsyncThunk(
       const response = await loginApi(credentials);
       return response;
     } catch (error: any) {
-      if (error.response) {
+      if (error.response && error.response.data) {
         return rejectWithValue(error.response.data);
       } else if (error.request) {
-        return rejectWithValue('No response received from server');
+        return rejectWithValue({ detail: 'No response received from server' });
       } else {
-        return rejectWithValue('Error setting up the request');
+        return rejectWithValue({ detail: 'Error setting up the request' });
       }
     }
   }
@@ -39,10 +41,9 @@ export const checkAuth = createAsyncThunk(
     const token = localStorage.getItem('token');
     if (token) {
       // Here you would typically validate the token with your backend
-      // For now, we'll just assume it's valid if it exists
       return { token };
     }
-    return rejectWithValue('No token found');
+    return rejectWithValue(null); // Changed this to return null instead of an error message
   }
 );
 
@@ -78,7 +79,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload as AuthError;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isAuthenticated = true;
@@ -87,6 +88,7 @@ const authSlice = createSlice({
       .addCase(checkAuth.rejected, (state) => {
         state.isAuthenticated = false;
         state.token = null;
+        // We're not setting an error here anymore
       });
   },
 });
