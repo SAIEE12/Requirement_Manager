@@ -11,6 +11,7 @@ from data_population.role_populator import populate_roles
 from data_population.user_populator import populate_users
 from data_population.client_populator import populate_clients
 from data_population.domain_populator import populate_domains
+from data_population.location_populator import populate_locations
 
 load_dotenv()
 NUM_USERS = int(os.getenv("NUM_USERS", 10))
@@ -21,6 +22,7 @@ def run_population(db: Session):
     populate_clients(db)
     populate_users(db, NUM_USERS)
     populate_domains(db)
+    populate_locations(db)
 
 def main():
     Base.metadata.create_all(bind=engine)

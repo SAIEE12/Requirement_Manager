@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DomainIcon from '@mui/icons-material/Domain';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { logout } from '../store/slices/authSlice';
 
 const drawerWidth = 240;
@@ -46,6 +47,7 @@ const Sidebar = () => {
     { text: 'Roles', icon: <AssignmentIcon />, path: '/roles' },
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Domains', icon: <DomainIcon />, path: '/domains' },
+    { text: 'Locations', icon: <LocationOnIcon />, path: '/locations' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
