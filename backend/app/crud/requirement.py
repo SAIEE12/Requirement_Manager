@@ -3,6 +3,7 @@ from sqlalchemy import select
 from app.models.requirement import Requirement
 from app.models.client import Client
 from app.models.location import Location
+from app.models.status import Status
 from app.schemas.requirement import RequirementCreate, RequirementUpdate
 
 def create_requirement(db: Session, requirement: RequirementCreate):
@@ -17,18 +18,20 @@ def get_requirement(db: Session, requirement_id: int):
 
 def get_requirements(db: Session, skip: int = 0, limit: int = 100):
     stmt = (
-        select(Requirement, Client.name.label("client_name"), Location.name.label("location_name"))
+        select(Requirement, Client.name.label("client_name"), Location.name.label("location_name"), Status)
         .join(Client, Requirement.client_id == Client.id)
         .join(Location, Requirement.location_id == Location.id)
+        .join(Status, Requirement.status_id == Status.id)
         .offset(skip)
         .limit(limit)
     )
     results = db.execute(stmt).all()
     requirements = []
     for result in results:
-        requirement, client_name, location_name = result
+        requirement, client_name, location_name, status = result
         setattr(requirement, 'client_name', client_name)
         setattr(requirement, 'location_name', location_name)
+        setattr(requirement, 'status', status)
         requirements.append(requirement)
     return requirements
 

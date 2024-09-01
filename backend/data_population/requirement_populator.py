@@ -2,12 +2,14 @@ from sqlalchemy.orm import Session
 from app.models.requirement import Requirement
 from app.crud.client import get_clients
 from app.crud.location import get_locations
+from app.crud.status import get_statuses
 import random
 
 def populate_requirements(db: Session):
     # Get existing clients and locations
     clients = get_clients(db, skip=0, limit=100)
     locations = get_locations(db, skip=0, limit=100)
+    statuses = get_statuses(db)
 
     if not clients or not locations:
         print("No clients or locations found. Please populate these first.")
@@ -30,6 +32,7 @@ def populate_requirements(db: Session):
             experience_min=random.randint(1, 5),
             experience_max=random.randint(6, 15),
             location_id=random.choice(locations).id,
+            status_id=random.choice(statuses).id,
             notes="This is a sample requirement"
         )
         db.add(requirement)
