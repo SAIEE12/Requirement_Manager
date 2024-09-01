@@ -20,11 +20,27 @@ import {
   Alert,
   Box,
   Switch,
+  Tooltip,
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { statusService, Status } from '../services/statusService';
+
+const StatusIndicator = styled('span')<{ active: boolean }>(({ theme, active }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '4px 8px',
+  borderRadius: '16px',
+  fontSize: '0.75rem',
+  fontWeight: 'bold',
+  color: active ? theme.palette.success.main : theme.palette.error.main,
+  backgroundColor: active ? theme.palette.success.light : theme.palette.error.light,
+  opacity: 0.8,
+}));
 
 const StatusManagementPage: React.FC = () => {
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -138,7 +154,7 @@ const StatusManagementPage: React.FC = () => {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Description</TableCell>
-              <TableCell>Active</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -148,7 +164,10 @@ const StatusManagementPage: React.FC = () => {
                 <TableCell>{status.name}</TableCell>
                 <TableCell>{status.description}</TableCell>
                 <TableCell>
-                  <Switch checked={status.is_active} disabled />
+                  <StatusIndicator active={status.is_active}>
+                    {status.is_active ? <CheckIcon fontSize="small" /> : <CloseIcon fontSize="small" />}
+                    {status.is_active ? 'Active' : 'Inactive'}
+                  </StatusIndicator>
                 </TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleOpenDialog(status)} size="small">
