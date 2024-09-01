@@ -20,10 +20,14 @@ import {
   Alert,
   Box,
   MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { requirementService, Requirement, RequirementCreate, RequirementUpdate } from '../services/requirementService';
 import { Client, Location } from '../types/types';
 
@@ -33,6 +37,7 @@ const RequirementsPage: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<Requirement | null>(null);
+  const [selectedRequirement, setSelectedRequirement] = useState<Requirement | null>(null);
   const [formData, setFormData] = useState({
     description: '',
     client_id: '',
@@ -44,6 +49,8 @@ const RequirementsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [filterClient, setFilterClient] = useState<string>('');
+  const [filterLocation, setFilterLocation] = useState<string>('');
 
   useEffect(() => {
     fetchRequirements();
@@ -158,8 +165,54 @@ const RequirementsPage: React.FC = () => {
     }
   };
 
+  const handleRequirementClick = (requirement: Requirement) => {
+    setSelectedRequirement(requirement);
+  };
+
+  const handleBackToList = () => {
+    setSelectedRequirement(null);
+  };
+
+  const filteredRequirements = requirements.filter((req) => {
+    return (
+      (!filterClient || req.client_id.toString() === filterClient) &&
+      (!filterLocation || req.location_id.toString() === filterLocation)
+    );
+  });
+
   if (loading) {
     return <CircularProgress />;
+  }
+
+  if (selectedRequirement) {
+    return (
+      <Container>
+        <Button startIcon={<ArrowBackIcon />} onClick={handleBackToList} style={{ marginBottom: '20px' }}>
+          Back to Requirements List
+        </Button>
+        <Typography variant="h4" gutterBottom>
+          Requirement Details
+        </Typography>
+        <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
+          <Typography variant="body1" paragraph>
+            <strong>Description:</strong> {selectedRequirement.description}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Client:</strong> {selectedRequirement.client_name}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
+          </Typography>
+          <Typography variant="body1">
+            <strong>Location:</strong> {selectedRequirement.location_name}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
+          </Typography>
+        </Paper>
+      </Container>
+    );
   }
 
   return (
@@ -177,10 +230,43 @@ const RequirementsPage: React.FC = () => {
         Add New Requirement
       </Button>
       {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
+      
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <FormControl style={{ minWidth: 200 }}>
+          <InputLabel>Filter by Client</InputLabel>
+          <Select
+            value={filterClient}
+            onChange={(e) => setFilterClient(e.target.value as string)}
+          >
+            <MenuItem value="">All Clients</MenuItem>
+            {clients.map((client) => (
+              <MenuItem key={client.id} value={client.id.toString()}>
+                {client.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl style={{ minWidth: 200 }}>
+          <InputLabel>Filter by Location</InputLabel>
+          <Select
+            value={filterLocation}
+            onChange={(e) => setFilterLocation(e.target.value as string)}
+          >
+            <MenuItem value="">All Locations</MenuItem>
+            {locations.map((location) => (
+              <MenuItem key={location.id} value={location.id.toString()}>
+                {location.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Client</TableCell>
               <TableCell>Experience (Years)</TableCell>
@@ -189,17 +275,18 @@ const RequirementsPage: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {requirements.map((requirement) => (
-              <TableRow key={requirement.id}>
-                <TableCell>{requirement.description}</TableCell>
+            {filteredRequirements.map((requirement) => (
+              <TableRow key={requirement.id} onClick={() => handleRequirementClick(requirement)} style={{ cursor: 'pointer' }}>
+                <TableCell>{requirement.id}</TableCell>
+                <TableCell>{requirement.description.length > 50 ? `${requirement.description.substring(0, 50)}...` : requirement.description}</TableCell>
                 <TableCell>{requirement.client_name}</TableCell>
                 <TableCell>{`${requirement.experience_min} - ${requirement.experience_max}`}</TableCell>
                 <TableCell>{requirement.location_name}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleOpenDialog(requirement)} size="small">
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDelete(requirement.id)} size="small">
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -209,7 +296,7 @@ const RequirementsPage: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle>{editingRequirement ? 'Edit Requirement' : 'Add New Requirement'}</DialogTitle>
         <DialogContent>
           <Box component="form" noValidate autoComplete="off">
@@ -221,6 +308,8 @@ const RequirementsPage: React.FC = () => {
               type="text"
               fullWidth
               required
+              multiline
+              rows={4}
               value={formData.description}
               onChange={handleInputChange}
               error={isSubmitted && !formData.description.trim()}
