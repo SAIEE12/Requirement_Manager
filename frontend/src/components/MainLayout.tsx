@@ -13,6 +13,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DomainIcon from '@mui/icons-material/Domain';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import { logout } from '../store/slices/authSlice';
 
 const drawerWidth = 240;
@@ -37,6 +38,7 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   },
 }));
 
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +50,7 @@ const Sidebar = () => {
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Domains', icon: <DomainIcon />, path: '/domains' },
     { text: 'Locations', icon: <LocationOnIcon />, path: '/locations' },
+    { text: 'Status', icon: <ListAltIcon />, path: '/status'},
     { text: 'Requirements', icon: <AssignmentIcon />, path: '/requirements' }, // New menu item
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];

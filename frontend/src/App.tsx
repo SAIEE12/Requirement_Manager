@@ -14,6 +14,7 @@ import LocationsPage from './pages/LocationsPage';
 import { RootState, AppDispatch } from './store/store';
 import { checkAuth } from './store/slices/authSlice';
 import RequirementsPage from './pages/RequirementsPage';
+import StatusManagementPage from './pages/StatusManagementPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -35,6 +36,7 @@ const App: React.FC = () => {
         <Route path="/requirements" element={<ProtectedRoute><RequirementsPage /></ProtectedRoute>} />
         <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
         <Route path="/roles" element={<ProtectedRoute><RolesPage /></ProtectedRoute>} />
+        <Route path="/status" element={<ProtectedRoute><StatusManagementPage /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
         <Route path="/domains" element={<ProtectedRoute><DomainsPage /></ProtectedRoute>} />
         <Route path="/locations" element={<ProtectedRoute><LocationsPage /></ProtectedRoute>} />
