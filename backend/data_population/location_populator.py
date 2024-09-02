@@ -1,23 +1,31 @@
 from sqlalchemy.orm import Session
 from app.crud.location import create_location, get_location_by_name
 from app.schemas.location import LocationCreate
+from datetime import datetime
 
 def populate_locations(db: Session):
     locations = [
-        {"name": "Hyderabad", "country": "India", "description": "City in Telangana, India"},
-        {"name": "Bangalore", "country": "India", "description": "Capital of Karnataka, India"},
-        {"name": "Noida", "country": "India", "description": "City in Uttar Pradesh, India"},
-        {"name": "Chennai", "country": "India", "description": "Capital of Tamil Nadu, India"},
-        {"name": "Singapore", "country": "Singapore", "description": "City-state in Southeast Asia"},
-        {"name": "Kuala Lumpur", "country": "Malaysia", "description": "Capital of Malaysia"},
-        {"name": "Ho Chi Minh City", "country": "Vietnam", "description": "Largest city in Vietnam"},
+        {"name": "Bengaluru", "country": "India", "description": "Silicon Valley of India"},
+        {"name": "Hyderabad", "country": "India", "description": "City of Pearls"},
+        {"name": "Noida", "country": "India", "description": "Planned city in NCR"},
+        {"name": "Chennai", "country": "India", "description": "Detroit of India"},
+        {"name": "Pune", "country": "India", "description": "Oxford of the East"},
+        {"name": "Singapore", "country": "Singapore", "description": "Lion City"},
+        {"name": "Penang", "country": "Malaysia", "description": "Pearl of the Orient"},
+        {"name": "Ho Chi Minh City", "country": "Vietnam", "description": "Formerly Saigon"},
+        {"name": "California", "country": "USA", "description": "Golden State"}
     ]
 
     for location_data in locations:
-        location = LocationCreate(**location_data)
-        existing_location = get_location_by_name(db, name=location.name)
+        existing_location = get_location_by_name(db, location_data["name"])
         if not existing_location:
+            location = LocationCreate(**location_data, is_active=True)
             create_location(db, location)
             print(f"Created location: {location.name}")
         else:
-            print(f"Location {location.name} already exists, skipping.")
+            print(f"Location {location_data['name']} already exists")
+
+def run_location_population(db: Session):
+    print("Populating locations...")
+    populate_locations(db)
+    print("Location population completed")

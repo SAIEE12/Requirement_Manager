@@ -19,10 +19,13 @@ import {
   CircularProgress,
   Alert,
   Box,
+  Switch,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreIcon from '@mui/icons-material/Restore';
 import { locationService, Location } from '../services/locationService';
 
 const LocationsPage: React.FC = () => {
@@ -33,19 +36,21 @@ const LocationsPage: React.FC = () => {
     name: '',
     country: '',
     description: '',
+    is_active: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
     fetchLocations();
-  }, []);
+  }, [showInactive]);
 
   const fetchLocations = async () => {
     setLoading(true);
     try {
-      const fetchedLocations = await locationService.getLocations();
+      const fetchedLocations = await locationService.getLocations(showInactive);
       setLocations(fetchedLocations);
       setError(null);
     } catch (err) {
@@ -62,11 +67,12 @@ const LocationsPage: React.FC = () => {
       setFormData({ 
         name: location.name, 
         country: location.country, 
-        description: location.description || '' 
+        description: location.description || '',
+        is_active: location.is_active
       });
     } else {
       setEditingLocation(null);
-      setFormData({ name: '', country: '', description: '' });
+      setFormData({ name: '', country: '', description: '', is_active: true });
     }
     setIsSubmitted(false);
     setOpenDialog(true);
@@ -78,8 +84,8 @@ const LocationsPage: React.FC = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, checked } = e.target;
+    setFormData({ ...formData, [name]: name === 'is_active' ? checked : value });
   };
 
   const handleSubmit = async () => {
@@ -88,7 +94,12 @@ const LocationsPage: React.FC = () => {
 
     try {
       if (editingLocation) {
-        await locationService.updateLocation(editingLocation.id, formData);
+        await locationService.updateLocation(editingLocation.id, {
+          name: formData.name,
+          country: formData.country,
+          description: formData.description,
+          is_active: formData.is_active  // Explicitly include is_active
+        });
       } else {
         await locationService.createLocation(formData);
       }
@@ -112,6 +123,16 @@ const LocationsPage: React.FC = () => {
     }
   };
 
+  const handleReactivate = async (id: number) => {
+    try {
+      await locationService.reactivateLocation(id);
+      fetchLocations();
+    } catch (err) {
+      setError('Failed to reactivate location');
+      console.error('Error reactivating location:', err);
+    }
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -121,15 +142,23 @@ const LocationsPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Location Management
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={() => handleOpenDialog()}
-        style={{ marginBottom: '20px' }}
-      >
-        Add New Location
-      </Button>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpenDialog()}
+        >
+          Add New Location
+        </Button>
+        <Box display="flex" alignItems="center">
+          <Typography variant="body1" mr={1}>Show Inactive</Typography>
+          <Switch
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+          />
+        </Box>
+      </Box>
       {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
       <TableContainer component={Paper}>
         <Table>
@@ -138,6 +167,7 @@ const LocationsPage: React.FC = () => {
               <TableCell>Name</TableCell>
               <TableCell>Country</TableCell>
               <TableCell>Description</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -148,12 +178,25 @@ const LocationsPage: React.FC = () => {
                 <TableCell>{location.country}</TableCell>
                 <TableCell>{location.description}</TableCell>
                 <TableCell>
+                  <Chip 
+                    label={location.is_active ? "Active" : "Inactive"} 
+                    color={location.is_active ? "success" : "error"} 
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell>
                   <IconButton onClick={() => handleOpenDialog(location)} size="small">
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDelete(location.id)} size="small">
-                    <DeleteIcon />
-                  </IconButton>
+                  {location.is_active ? (
+                    <IconButton onClick={() => handleDelete(location.id)} size="small">
+                      <DeleteIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton onClick={() => handleReactivate(location.id)} size="small">
+                      <RestoreIcon />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -199,6 +242,14 @@ const LocationsPage: React.FC = () => {
               value={formData.description}
               onChange={handleInputChange}
             />
+            <Box display="flex" alignItems="center" mt={2}>
+              <Switch
+                name="is_active"
+                checked={formData.is_active}
+                onChange={handleInputChange}
+              />
+              <Typography>Active</Typography>
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

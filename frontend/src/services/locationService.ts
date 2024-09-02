@@ -1,31 +1,62 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
 export interface Location {
   id: number;
   name: string;
   country: string;
-  description: string | null;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
+export interface LocationCreate {
+  name: string;
+  country: string;
+  description?: string;
+  is_active: boolean;
+}
+
+export interface LocationUpdate {
+  name?: string;
+  country?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/locations';
+// const API_URL = '/api/locations';
+
 export const locationService = {
-  getLocations: async (): Promise<Location[]> => {
-    const response = await axios.get(`${API_URL}/locations/`);
+  getLocations: async (includeInactive: boolean = false): Promise<Location[]> => {
+    const response = await axios.get(`${API_URL}?include_inactive=${includeInactive}`);
     return response.data;
   },
 
-  createLocation: async (locationData: Omit<Location, 'id'>): Promise<Location> => {
-    const response = await axios.post(`${API_URL}/locations/`, locationData);
+  getLocation: async (id: number): Promise<Location> => {
+    const response = await axios.get(`${API_URL}/${id}`);
     return response.data;
   },
 
-  updateLocation: async (id: number, locationData: Partial<Omit<Location, 'id'>>): Promise<Location> => {
-    const response = await axios.put(`${API_URL}/locations/${id}/`, locationData);
+  createLocation: async (location: LocationCreate): Promise<Location> => {
+    const response = await axios.post(API_URL, location);
+    return response.data;
+  },
+
+  updateLocation: async (id: number, location: LocationUpdate): Promise<Location> => {
+    const response = await axios.put(`${API_URL}/${id}`, {
+      ...location,
+      is_active: location.is_active  
+    });
     return response.data;
   },
 
   deleteLocation: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/locations/${id}/`);
+    await axios.delete(`${API_URL}/${id}`);
   },
+
+  reactivateLocation: async (id: number): Promise<Location> => {
+    const response = await axios.post(`${API_URL}/${id}/reactivate`);
+    return response.data;
+  }
 };
