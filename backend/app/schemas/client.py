@@ -1,5 +1,6 @@
-# app/schemas/client.py
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+from datetime import datetime
 
 class ClientBase(BaseModel):
     name: str
@@ -9,13 +10,27 @@ class ClientBase(BaseModel):
     phone: str
 
 class ClientCreate(ClientBase):
-    pass
+    is_active: bool = True
 
-class ClientUpdate(ClientBase):
-    pass
+class ClientUpdate(BaseModel):
+    name: Optional[str] = None
+    industry: Optional[str] = None
+    contact_person: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    is_active: Optional[bool] = None
 
-class Client(ClientBase):
+class ClientInDBBase(ClientBase):
     id: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
+
+class Client(ClientInDBBase):
+    pass
+
+class ClientInDB(ClientInDBBase):
+    pass
