@@ -11,6 +11,7 @@ from data_population.role_populator import populate_roles
 from data_population.user_populator import populate_users
 from data_population.client_populator import populate_clients
 from data_population.domain_populator import populate_domains
+from data_population.skill_populator import populate_skills
 from data_population.location_populator import populate_locations
 from data_population.requirement_populator import populate_requirements
 from data_population.status_populator import populate_statuses
@@ -24,6 +25,7 @@ def run_population(db: Session):
     populate_clients(db)
     populate_users(db, NUM_USERS)
     populate_domains(db)
+    populate_skills(db)
     populate_locations(db)
     populate_statuses(db)
     populate_requirements(db)

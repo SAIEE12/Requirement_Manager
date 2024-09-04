@@ -1,23 +1,28 @@
 from sqlalchemy.orm import Session
-from app.crud.domain import create_domain
+from app.crud.domain import create_domain, get_domain_by_name
 from app.schemas.domain import DomainCreate
-from app.models.domain import Domain
 
 def populate_domains(db: Session):
     domains = [
-        {"name": "DV", "description": "Design Verification"},
-        {"name": "PD", "description": "Physical Design"},
-        {"name": "Analog Design", "description": "Analog Circuit Design"},
-        {"name": "Embedded Software", "description": "Embedded Systems Software Development"},
-        {"name": "IT Software", "description": "Information Technology Software Development"},
-        {"name": "AI", "description": "Artificial Intelligence"},
+        {"name": "Hardware", "is_active": True},
+        {"name": "Software", "is_active": True},
+        {"name": "Embedded", "is_active": True},
+        {"name": "Automotive", "is_active": True}
     ]
 
     for domain_data in domains:
-        domain = DomainCreate(**domain_data)
-        existing_domain = db.query(Domain).filter(Domain.name == domain.name).first()
+        existing_domain = get_domain_by_name(db, domain_data["name"])
         if not existing_domain:
-            create_domain(db, domain)
-            print(f"Created domain: {domain.name}")
+            domain = DomainCreate(**domain_data)
+            db_domain = create_domain(db, domain)
+            if db_domain:
+                print(f"Created domain: {db_domain.name}")
+            else:
+                print(f"Failed to create domain: {domain_data['name']}")
         else:
-            print(f"Domain {domain.name} already exists, skipping.")
+            print(f"Domain {domain_data['name']} already exists")
+
+def run_domain_population(db: Session):
+    print("Populating domains...")
+    populate_domains(db)
+    print("Domain population completed")

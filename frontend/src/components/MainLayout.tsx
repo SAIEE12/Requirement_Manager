@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DomainIcon from '@mui/icons-material/Domain';
+import BuildIcon from '@mui/icons-material/Build';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import { logout } from '../store/slices/authSlice';
@@ -49,6 +50,7 @@ const Sidebar = () => {
     { text: 'Roles', icon: <AssignmentIcon />, path: '/roles' },
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     { text: 'Domains', icon: <DomainIcon />, path: '/domains' },
+    { text: 'Skills', icon: <BuildIcon />, path: '/skills' },
     { text: 'Locations', icon: <LocationOnIcon />, path: '/locations' },
     { text: 'Status', icon: <ListAltIcon />, path: '/status'},
     { text: 'Requirements', icon: <AssignmentIcon />, path: '/requirements' }, // New menu item

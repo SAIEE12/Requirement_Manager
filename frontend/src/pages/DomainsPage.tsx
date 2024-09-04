@@ -19,32 +19,32 @@ import {
   CircularProgress,
   Alert,
   Box,
+  Switch,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreIcon from '@mui/icons-material/Restore';
 import { domainService, Domain } from '../services/domainService';
 
 const DomainsPage: React.FC = () => {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
+  const [formData, setFormData] = useState({ name: '', is_active: true });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
     fetchDomains();
-  }, []);
+  }, [showInactive]);
 
   const fetchDomains = async () => {
     setLoading(true);
     try {
-      const fetchedDomains = await domainService.getDomains();
+      const fetchedDomains = await domainService.getDomains(showInactive);
       setDomains(fetchedDomains);
       setError(null);
     } catch (err) {
@@ -58,12 +58,11 @@ const DomainsPage: React.FC = () => {
   const handleOpenDialog = (domain: Domain | null = null) => {
     if (domain) {
       setEditingDomain(domain);
-      setFormData({ name: domain.name, description: domain.description || '' });
+      setFormData({ name: domain.name, is_active: domain.is_active });
     } else {
       setEditingDomain(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', is_active: true });
     }
-    setIsSubmitted(false);
     setOpenDialog(true);
   };
 
@@ -73,14 +72,11 @@ const DomainsPage: React.FC = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, checked } = e.target;
+    setFormData({ ...formData, [name]: name === 'is_active' ? checked : value });
   };
 
   const handleSubmit = async () => {
-    setIsSubmitted(true);
-    if (!formData.name.trim()) return;
-
     try {
       if (editingDomain) {
         await domainService.updateDomain(editingDomain.id, formData);
@@ -89,21 +85,24 @@ const DomainsPage: React.FC = () => {
       }
       fetchDomains();
       handleCloseDialog();
+      setError(null);  // Clear any previous errors
     } catch (err: any) {
-      setError('Failed to save domain');
+      setError(err.message || 'Failed to save domain');
       console.error('Error saving domain:', err);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this domain?')) {
-      try {
+  const handleToggleActive = async (id: number, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
         await domainService.deleteDomain(id);
-        fetchDomains();
-      } catch (err) {
-        setError('Failed to delete domain');
-        console.error('Error deleting domain:', err);
+      } else {
+        await domainService.reactivateDomain(id);
       }
+      fetchDomains();
+    } catch (err) {
+      setError(`Failed to ${currentStatus ? 'deactivate' : 'reactivate'} domain`);
+      console.error('Error toggling domain status:', err);
     }
   };
 
@@ -116,22 +115,30 @@ const DomainsPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Domain Management
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={() => handleOpenDialog()}
-        style={{ marginBottom: '20px' }}
-      >
-        Add New Domain
-      </Button>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpenDialog()}
+        >
+          Add New Domain
+        </Button>
+        <Box display="flex" alignItems="center">
+          <Typography variant="body1" mr={1}>Show Inactive</Typography>
+          <Switch
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
+          />
+        </Box>
+      </Box>
       {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -139,13 +146,19 @@ const DomainsPage: React.FC = () => {
             {domains.map((domain) => (
               <TableRow key={domain.id}>
                 <TableCell>{domain.name}</TableCell>
-                <TableCell>{domain.description}</TableCell>
+                <TableCell>
+                  <Chip 
+                    label={domain.is_active ? "Active" : "Inactive"} 
+                    color={domain.is_active ? "success" : "error"} 
+                    variant="outlined"
+                  />
+                </TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleOpenDialog(domain)} size="small">
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDelete(domain.id)} size="small">
-                    <DeleteIcon />
+                  <IconButton onClick={() => handleToggleActive(domain.id, domain.is_active)} size="small">
+                    {domain.is_active ? <DeleteIcon /> : <RestoreIcon />}
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -157,29 +170,24 @@ const DomainsPage: React.FC = () => {
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>{editingDomain ? 'Edit Domain' : 'Add New Domain'}</DialogTitle>
         <DialogContent>
-          <Box component="form" noValidate autoComplete="off">
-            <TextField
-              autoFocus
-              margin="dense"
-              name="name"
-              label="Domain Name"
-              type="text"
-              fullWidth
-              required
-              value={formData.name}
-              onChange={handleInputChange}
-              error={isSubmitted && !formData.name.trim()}
-              helperText={isSubmitted && !formData.name.trim() ? 'Domain name is required' : ''}
-            />
-            <TextField
-              margin="dense"
-              name="description"
-              label="Description"
-              type="text"
-              fullWidth
-              value={formData.description}
+          <TextField
+            autoFocus
+            margin="dense"
+            name="name"
+            label="Domain Name"
+            type="text"
+            fullWidth
+            required
+            value={formData.name}
+            onChange={handleInputChange}
+          />
+          <Box display="flex" alignItems="center" mt={2}>
+            <Switch
+              name="is_active"
+              checked={formData.is_active}
               onChange={handleInputChange}
             />
+            <Typography>Active</Typography>
           </Box>
         </DialogContent>
         <DialogActions>

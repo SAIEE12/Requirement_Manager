@@ -10,6 +10,7 @@ import MainLayout from './components/MainLayout';
 import UsersPage from './pages/UsersPage';
 import RolesPage from './pages/RolesPage';
 import DomainsPage from './pages/DomainsPage';
+import SkillsPage from './pages/SkillsPage';
 import LocationsPage from './pages/LocationsPage';
 import { RootState, AppDispatch } from './store/store';
 import { checkAuth } from './store/slices/authSlice';
@@ -39,6 +40,7 @@ const App: React.FC = () => {
         <Route path="/status" element={<ProtectedRoute><StatusManagementPage /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
         <Route path="/domains" element={<ProtectedRoute><DomainsPage /></ProtectedRoute>} />
+        <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
         <Route path="/locations" element={<ProtectedRoute><LocationsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,15 +1,16 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 
-class Domain(Base):
-    __tablename__ = "domains"
+class Skill(Base):
+    __tablename__ = "skills"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
+    domain_id = Column(Integer, ForeignKey("domains.id"))
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    skills = relationship("Skill", back_populates="domain")
+    domain = relationship("Domain", back_populates="skills")

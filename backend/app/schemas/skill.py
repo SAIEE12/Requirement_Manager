@@ -2,17 +2,19 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-class DomainBase(BaseModel):
+class SkillBase(BaseModel):
     name: Optional[str] = None
+    domain_id: Optional[int] = None
     is_active: Optional[bool] = True
 
-class DomainCreate(DomainBase):
+class SkillCreate(SkillBase):
     name: str
+    domain_id: int
 
-class DomainUpdate(DomainBase):
+class SkillUpdate(SkillBase):
     pass
 
-class DomainInDBBase(DomainBase):
+class SkillInDBBase(SkillBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -20,8 +22,8 @@ class DomainInDBBase(DomainBase):
     class Config:
         from_attributes = True
 
-class Domain(DomainInDBBase):
+class Skill(SkillInDBBase):
     pass
 
-class DomainInDB(DomainInDBBase):
+class SkillInDB(SkillInDBBase):
     pass
