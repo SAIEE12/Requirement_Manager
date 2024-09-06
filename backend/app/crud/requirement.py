@@ -1,69 +1,98 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 from app.models.requirement import Requirement
-from app.models.client import Client
-from app.models.location import Location
-from app.models.status import Status
+from app.models.skill import Skill
 from app.schemas.requirement import RequirementCreate, RequirementUpdate
+from typing import List, Optional
+from datetime import datetime
+
+def get_requirement(db: Session, requirement_id: int):
+    return db.query(Requirement).options(
+        joinedload(Requirement.skills),
+        joinedload(Requirement.location),
+        joinedload(Requirement.client),
+        joinedload(Requirement.domain),
+        joinedload(Requirement.status)
+    ).filter(Requirement.id == requirement_id).first()
+
+def get_requirements(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(Requirement).options(
+        joinedload(Requirement.skills),
+        joinedload(Requirement.location),
+        joinedload(Requirement.client),
+        joinedload(Requirement.domain),
+        joinedload(Requirement.status)
+    ).offset(skip).limit(limit).all()
 
 def create_requirement(db: Session, requirement: RequirementCreate):
-    db_requirement = Requirement(**requirement.dict())
+    db_requirement = Requirement(**requirement.dict(exclude={'skill_ids'}))
     db.add(db_requirement)
     db.commit()
     db.refresh(db_requirement)
-    return get_requirement_with_names(db, db_requirement.id)
-
-def get_requirement(db: Session, requirement_id: int):
-    return get_requirement_with_names(db, requirement_id)
-
-def get_requirements(db: Session, skip: int = 0, limit: int = 100):
-    stmt = (
-        select(Requirement, Client.name.label("client_name"), Location.name.label("location_name"), Status)
-        .join(Client, Requirement.client_id == Client.id)
-        .join(Location, Requirement.location_id == Location.id)
-        .join(Status, Requirement.status_id == Status.id)
-        .offset(skip)
-        .limit(limit)
-    )
-    results = db.execute(stmt).all()
-    requirements = []
-    for result in results:
-        requirement, client_name, location_name, status = result
-        setattr(requirement, 'client_name', client_name)
-        setattr(requirement, 'location_name', location_name)
-        setattr(requirement, 'status', status)
-        requirements.append(requirement)
-    return requirements
+    
+    # Add skills
+    for skill_id in requirement.skill_ids:
+        skill = db.query(Skill).filter(Skill.id == skill_id).first()
+        if skill:
+            db_requirement.skills.append(skill)
+    
+    db.commit()
+    db.refresh(db_requirement)
+    return db_requirement
 
 def update_requirement(db: Session, requirement_id: int, requirement: RequirementUpdate):
     db_requirement = db.query(Requirement).filter(Requirement.id == requirement_id).first()
     if db_requirement:
         update_data = requirement.dict(exclude_unset=True)
         for key, value in update_data.items():
-            setattr(db_requirement, key, value)
+            if key != 'skill_ids':
+                setattr(db_requirement, key, value)
+        
+        if 'skill_ids' in update_data:
+            db_requirement.skills = []
+            for skill_id in update_data['skill_ids']:
+                skill = db.query(Skill).filter(Skill.id == skill_id).first()
+                if skill:
+                    db_requirement.skills.append(skill)
+        
         db.commit()
         db.refresh(db_requirement)
-        return get_requirement_with_names(db, requirement_id)
-    return None
-
-def delete_requirement(db: Session, requirement_id: int):
-    db_requirement = get_requirement_with_names(db, requirement_id)
-    if db_requirement:
-        db.delete(db_requirement)
-        db.commit()
     return db_requirement
 
-def get_requirement_with_names(db: Session, requirement_id: int):
-    stmt = (
-        select(Requirement, Client.name.label("client_name"), Location.name.label("location_name"))
-        .join(Client, Requirement.client_id == Client.id)
-        .join(Location, Requirement.location_id == Location.id)
-        .where(Requirement.id == requirement_id)
+def delete_requirement(db: Session, requirement_id: int):
+    requirement = db.query(Requirement).filter(Requirement.id == requirement_id).first()
+    if requirement:
+        db.delete(requirement)
+        db.commit()
+        return True
+    return False
+
+def filter_requirements(db: Session,
+                        client_id: Optional[int] = None,
+                        location_id: Optional[int] = None,
+                        domain_id: Optional[int] = None,
+                        status_id: Optional[int] = None,
+                        priority: Optional[str] = None,
+                        created_after: Optional[datetime] = None,
+                        created_before: Optional[datetime] = None):
+    query = db.query(Requirement).options(
+        joinedload(Requirement.skills),
+        joinedload(Requirement.location),
+        joinedload(Requirement.client),
+        joinedload(Requirement.domain),
+        joinedload(Requirement.status)
     )
-    result = db.execute(stmt).first()
-    if result:
-        requirement, client_name, location_name = result
-        setattr(requirement, 'client_name', client_name)
-        setattr(requirement, 'location_name', location_name)
-        return requirement
-    return None
+    if client_id:
+        query = query.filter(Requirement.client_id == client_id)
+    if location_id:
+        query = query.filter(Requirement.location_id == location_id)
+    if domain_id:
+        query = query.filter(Requirement.domain_id == domain_id)
+    if status_id:
+        query = query.filter(Requirement.status_id == status_id)
+    if priority:
+        query = query.filter(Requirement.priority == priority)
+    if created_after:
+        query = query.filter(Requirement.created_at >= created_after)
+    if created_before:
+        query = query.filter(Requirement.created_at <= created_before)
+    return query.all()

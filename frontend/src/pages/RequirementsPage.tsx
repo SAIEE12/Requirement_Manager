@@ -199,13 +199,13 @@ const RequirementsPage: React.FC = () => {
             <strong>Description:</strong> {selectedRequirement.description}
           </Typography>
           <Typography variant="body1">
-            <strong>Client:</strong> {selectedRequirement.client_name}
+            <strong>Client:</strong> {selectedRequirement.client.name}
           </Typography>
           <Typography variant="body1">
             <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
           </Typography>
           <Typography variant="body1">
-            <strong>Location:</strong> {selectedRequirement.location_name}
+            <strong>Location:</strong> {selectedRequirement.location.name}
           </Typography>
           <Typography variant="body1" paragraph>
             <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
@@ -279,9 +279,9 @@ const RequirementsPage: React.FC = () => {
               <TableRow key={requirement.id} onClick={() => handleRequirementClick(requirement)} style={{ cursor: 'pointer' }}>
                 <TableCell>{requirement.id}</TableCell>
                 <TableCell>{requirement.description.length > 50 ? `${requirement.description.substring(0, 50)}...` : requirement.description}</TableCell>
-                <TableCell>{requirement.client_name}</TableCell>
+                <TableCell>{requirement.client.name}</TableCell>
                 <TableCell>{`${requirement.experience_min} - ${requirement.experience_max}`}</TableCell>
-                <TableCell>{requirement.location_name}</TableCell>
+                <TableCell>{requirement.location.name}</TableCell>
                 <TableCell>
                   <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
                     <EditIcon />

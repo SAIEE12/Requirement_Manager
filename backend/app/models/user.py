@@ -16,6 +16,6 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    
     role = relationship("Role", back_populates="users")
-
+    # comments = relationship("Comment", back_populates="user")

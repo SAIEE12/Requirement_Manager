@@ -7,11 +7,11 @@ export interface Requirement {
   id: number;
   description: string;
   client_id: number;
-  client_name: string;
+  client: Client;
   experience_min: number;
   experience_max: number;
   location_id: number;
-  location_name: string;
+  location: Location;
   notes?: string;
 }
 

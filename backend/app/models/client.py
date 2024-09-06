@@ -5,7 +5,7 @@ from app.database import Base
 
 class Client(Base):
     __tablename__ = "clients"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     industry = Column(String)
@@ -15,5 +15,5 @@ class Client(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
+    
     requirements = relationship("Requirement", back_populates="client")

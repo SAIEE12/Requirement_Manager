@@ -8,28 +8,25 @@ import os
 
 from fastapi.responses import HTMLResponse
 from data_population.main_populator import run_population
-from app.api.endpoints.roles import router as roles_router
-from app.api.endpoints.users import router as users_router
-from app.api.endpoints.auth import router as auth_router
-from app.api.endpoints.clients import router as clients_router
-from app.api.endpoints.domains import router as domains_router
-from app.api.endpoints.skills import router as skills_router
-from app.api.endpoints.locations import router as locations_router
-from app.api.endpoints.requirements import router as requirements_router
-from app.api.endpoints.status import router as status_router
-
+from app.api.endpoints import roles, users, auth, clients, domains, skills, locations, requirements, status
+from app.core.errors import AppException, app_exception_handler
+from app.middleware.logging import log_requests
+from app.core.config import settings
 
 def create_app():
-    app = FastAPI()
+    app = FastAPI(title=settings.PROJECT_NAME)
 
     app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # This is the default URL for Create React App
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
+        CORSMiddleware,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
+    app.add_exception_handler(AppException, app_exception_handler)
+    app.middleware("http")(log_requests)
+    
     # Get the directory of the current file
     current_dir = os.path.dirname(os.path.realpath(__file__))
     # Go up one level to the 'backend' directory
@@ -40,31 +37,24 @@ def create_app():
     # Mount the static directory using the absolute path
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-
     # Routes
-    app.include_router(requirements_router, prefix="/api/requirements", tags=["requirements"])
-    app.include_router(roles_router, prefix="/api/roles", tags=["roles"])
-    app.include_router(users_router, prefix="/api/users", tags=["users"])
-    app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
-    app.include_router(clients_router, prefix="/api/clients", tags=["clients"])
-    app.include_router(domains_router, prefix="/api/domains", tags=["domains"])
-    app.include_router(skills_router, prefix="/api/skills", tags=["skills"])
-    app.include_router(locations_router, prefix="/api/locations", tags=["locations"])
-    app.include_router(status_router, prefix="/api/status", tags=["status"])
+    app.include_router(requirements.router, prefix=f"{settings.API_V1_STR}/requirements", tags=["requirements"])
+    app.include_router(roles.router, prefix=f"{settings.API_V1_STR}/roles", tags=["roles"])
+    app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
+    app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+    app.include_router(clients.router, prefix=f"{settings.API_V1_STR}/clients", tags=["clients"])
+    app.include_router(domains.router, prefix=f"{settings.API_V1_STR}/domains", tags=["domains"])
+    app.include_router(skills.router, prefix=f"{settings.API_V1_STR}/skills", tags=["skills"])
+    app.include_router(locations.router, prefix=f"{settings.API_V1_STR}/locations", tags=["locations"])
+    app.include_router(status.router, prefix=f"{settings.API_V1_STR}/status", tags=["status"])
 
     # Create database tables
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-
-    @app.get("/")
-    async def root():
-        return {"message": "Hello World"}
 
     return app
 
 app = create_app()
-
-
-
 
 # Dependency
 def get_db():
@@ -76,15 +66,12 @@ def get_db():
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": f"Welcome to {settings.PROJECT_NAME}"}
 
 # Dummy endpoint for database population
-@app.post("/dev/populate-db")
+@app.post(f"/dev/populate-db")
 async def populate_database(db: Session = Depends(get_db)):
-    # This flag can be set based on an environment variable
-    is_development = os.getenv("FASTAPI_ENV", "development") == "development"
-    
-    if is_development:
+    if settings.FASTAPI_ENV == "development":
         try:
             run_population(db)
             return {"message": "Database populated successfully"}
@@ -97,7 +84,7 @@ async def populate_database(db: Session = Depends(get_db)):
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
-@app.get("/db-test")
+@app.get(f"{settings.API_V1_STR}/db-test")
 def test_db(db: Session = Depends(get_db)):
     return {"message": "Database connection successful"}
 
