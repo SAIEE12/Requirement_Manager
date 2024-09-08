@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime, date
 from typing import List, Optional
+from app.schemas.comment import Comment
 
 class SkillBase(BaseModel):
     id: int
@@ -54,6 +55,7 @@ class Requirement(RequirementBase):
     skills: List[SkillBase]
     location: LocationBase
     client: ClientBase
+    comments: List[Comment]
 
     class Config:
         from_attributes = True

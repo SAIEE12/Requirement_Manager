@@ -27,3 +27,4 @@ class Requirement(Base):
     domain = relationship("Domain", back_populates="requirements")
     status = relationship("Status", back_populates="requirements")
     skills = relationship("Skill", secondary=requirement_skill, back_populates="requirements")
+    comments = relationship("Comment", back_populates="requirement")

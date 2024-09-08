@@ -1,7 +1,23 @@
 import axios from 'axios';
 import { Client, Location } from '../types/types';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+
+export interface Comment {
+  id: number;
+  content: string;
+  requirement_id: number;
+  user_id: number;
+  created_at: string;
+}
+
+export interface RequirementComment {
+  id: number;
+  content: string;
+  requirement_id: number;
+  user_id: number;
+  created_at: string;
+}
 
 export interface Requirement {
   id: number;
@@ -13,6 +29,7 @@ export interface Requirement {
   location_id: number;
   location: Location;
   notes?: string;
+  comments?: RequirementComment[];
 }
 
 export interface RequirementCreate {
@@ -32,6 +49,8 @@ export interface RequirementUpdate {
   location_id?: number;
   notes?: string;
 }
+
+
 
 export const requirementService = {
   getRequirements: async (): Promise<Requirement[]> => {
@@ -65,6 +84,16 @@ export const requirementService = {
 
   getLocations: async (): Promise<Location[]> => {
     const response = await axios.get(`${API_URL}/locations`);
+    return response.data;
+  },
+
+  getComments: async (requirementId: number): Promise<RequirementComment[]> => {
+    const response = await axios.get(`${API_URL}/requirements/${requirementId}/comments`);
+    return response.data;
+  },
+
+  addComment: async (requirementId: number, content: string): Promise<RequirementComment> => {
+    const response = await axios.post(`${API_URL}/requirements/${requirementId}/comments`, { content });
     return response.data;
   },
 };

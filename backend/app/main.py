@@ -8,7 +8,7 @@ import os
 
 from fastapi.responses import HTMLResponse
 from data_population.main_populator import run_population
-from app.api.endpoints import roles, users, auth, clients, domains, skills, locations, requirements, status
+from app.api.endpoints import roles, users, auth, clients, domains, skills, locations, requirements, status, comments
 from app.core.errors import AppException, app_exception_handler
 from app.middleware.logging import log_requests
 from app.core.config import settings
@@ -47,6 +47,7 @@ def create_app():
     app.include_router(skills.router, prefix=f"{settings.API_V1_STR}/skills", tags=["skills"])
     app.include_router(locations.router, prefix=f"{settings.API_V1_STR}/locations", tags=["locations"])
     app.include_router(status.router, prefix=f"{settings.API_V1_STR}/status", tags=["status"])
+    app.include_router(comments.router, prefix=f"{settings.API_V1_STR}", tags=["comments"])
 
     # Create database tables
     Base.metadata.drop_all(bind=engine)

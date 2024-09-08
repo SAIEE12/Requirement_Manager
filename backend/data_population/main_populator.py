@@ -15,6 +15,7 @@ from data_population.skill_populator import populate_skills
 from data_population.location_populator import populate_locations
 from data_population.requirement_populator import populate_requirements
 from data_population.status_populator import populate_statuses
+from data_population.comment_populator import populate_comments
 
 load_dotenv()
 NUM_USERS = int(os.getenv("NUM_USERS", 10))
@@ -29,6 +30,7 @@ def run_population(db: Session):
     populate_locations(db)
     populate_statuses(db)
     populate_requirements(db)
+    populate_comments(db)
 
 def main():
     Base.metadata.create_all(bind=engine)
