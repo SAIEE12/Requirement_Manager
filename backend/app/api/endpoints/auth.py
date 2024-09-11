@@ -1,3 +1,5 @@
+# app/api/endpoints/auth.py
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -26,29 +28,24 @@ async def login_for_access_token(
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-        token_data = TokenData(username=user.username)
-        access_token = _create_user_token(token_data)
-        
+        token_data = TokenData(username=user.username, user_id=user.id)
+        access_token = create_user_token(token_data)
         return {"access_token": access_token, "token_type": "bearer"}
-    
     except HTTPException as http_exc:
-        # Re-raise HTTP exceptions (like our 401 Unauthorized)
         raise http_exc
     except Exception as e:
-        # Log the exception here
-        print(f"An error occurred: {str(e)}")  # Replace with proper logging
+        print(f"An error occurred: {str(e)}") # Replace with proper logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing your request."
         )
 
-def _create_user_token(token_data: TokenData) -> str:
+def create_user_token(token_data: TokenData) -> str:
     """
     Create an access token for the user.
     """
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return create_access_token(
-        data={"sub": token_data.username},
+        data={"sub": token_data.username, "user_id": token_data.user_id},
         expires_delta=access_token_expires
     )
