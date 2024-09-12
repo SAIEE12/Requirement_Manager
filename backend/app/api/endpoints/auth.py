@@ -34,7 +34,6 @@ async def login_for_access_token(
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        print(f"An error occurred: {str(e)}") # Replace with proper logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing your request."

@@ -1,31 +1,50 @@
 # app/api/endpoints/comments.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Header
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app import crud, models, schemas
 from app.api import deps
+from app.core import security
+from app.core.config import settings
+from jose import jwt, JWTError
+from app.database import get_db
 
 router = APIRouter()
 
 @router.get("/requirements/{requirement_id}/comments", response_model=List[schemas.Comment])
-def read_comments(
+async def read_comments(
+    request: Request,
     requirement_id: int,
-    db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 100
 ):
-    comments = crud.comment.get_comments(db, requirement_id=requirement_id, skip=skip, limit=limit)
-    return comments
+    db = next(get_db())
+    try:
+        await deps.get_current_active_user(request)  # Ensure user is authenticated
+        comments = crud.comment.get_comments(db, requirement_id=requirement_id, skip=skip, limit=limit)
+        return comments
+    finally:
+        db.close()
 
 @router.post("/requirements/{requirement_id}/comments", response_model=schemas.Comment)
-def create_comment(
+async def create_comment(
+    request: Request,
     requirement_id: int,
-    comment_in: schemas.CommentCreate,
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user)
+    comment_in: schemas.CommentCreate
 ):
-    return crud.comment.create_comment(db=db, comment=comment_in, requirement_id=requirement_id, user_id=current_user.id)
+    db = next(get_db())
+    try:
+        current_user = await deps.get_current_active_user(request)
+        return crud.comment.create_comment(
+            db=db, 
+            comment=comment_in, 
+            requirement_id=requirement_id, 
+            user_id=current_user.id
+        )
+    finally:
+        db.close()
+
 
 @router.put("/comments/{comment_id}", response_model=schemas.Comment)
 def update_comment(

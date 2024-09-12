@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from . import database
-from app.database import engine, Base
+from app.database import engine, Base, get_db
 import os
 
 from fastapi.responses import HTMLResponse
@@ -50,20 +50,12 @@ def create_app():
     app.include_router(comments.router, prefix=f"{settings.API_V1_STR}", tags=["comments"])
 
     # Create database tables
-    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
     return app
 
 app = create_app()
 
-# Dependency
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 async def root():
@@ -88,6 +80,11 @@ async def say_hello(name: str):
 @app.get(f"{settings.API_V1_STR}/db-test")
 def test_db(db: Session = Depends(get_db)):
     return {"message": "Database connection successful"}
+
+@app.middleware("http")
+async def debug_request(request: Request, call_next):
+    response = await call_next(request)
+    return response
 
 @app.get("/test-favicon", response_class=HTMLResponse)
 async def test_favicon():

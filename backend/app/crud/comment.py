@@ -8,7 +8,11 @@ def get_comments(db: Session, requirement_id: int, skip: int = 0, limit: int = 1
     return db.query(Comment).filter(Comment.requirement_id == requirement_id).offset(skip).limit(limit).all()
 
 def create_comment(db: Session, comment: CommentCreate, requirement_id: int, user_id: int):
-    db_comment = Comment(**comment.dict(), requirement_id=requirement_id, user_id=user_id)
+    db_comment = Comment(
+        content=comment.content,
+        requirement_id=requirement_id,
+        user_id=user_id
+    )
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)

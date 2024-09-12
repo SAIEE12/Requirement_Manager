@@ -15,6 +15,9 @@ def get_user_by_username(db: Session, username: str):
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
+def get(db: Session, id: int):
+    return db.query(User).filter(User.id == id).first()
+
 def create_user(db: Session, user: UserCreate):
     hashed_password = get_password_hash(user.password)
     db_user = User(
@@ -58,3 +61,7 @@ def authenticate_user(db: Session, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
+
+def is_active(user: User) -> bool:
+    return user.is_active
