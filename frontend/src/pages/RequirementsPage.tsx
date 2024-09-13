@@ -250,7 +250,7 @@ const RequirementsPage: React.FC = () => {
                   <ListItem>
                     <ListItemText
                       primary={comment.content}
-                      secondary={`User ID: ${comment.user_id} | ${new Date(comment.created_at).toLocaleString()}`}
+                      secondary={`${comment.username} | ${new Date(comment.created_at).toLocaleString()}`}
                     />
                   </ListItem>
                   {index < comments.length - 1 && <Divider />}

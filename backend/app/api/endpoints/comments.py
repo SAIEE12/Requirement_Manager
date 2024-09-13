@@ -22,7 +22,21 @@ async def read_comments(
     db = next(get_db())
     try:
         await deps.get_current_active_user(request)  # Ensure user is authenticated
-        comments = crud.comment.get_comments(db, requirement_id=requirement_id, skip=skip, limit=limit)
+        comments_with_username = crud.comment.get_comments(db, requirement_id=requirement_id, skip=skip, limit=limit)
+        
+        # Convert the result to the expected schema
+        comments = [
+            schemas.Comment(
+                id=comment.id,
+                content=comment.content,
+                requirement_id=comment.requirement_id,
+                user_id=comment.user_id,
+                created_at=comment.created_at,
+                username=username
+            )
+            for comment, username in comments_with_username
+        ]
+        
         return comments
     finally:
         db.close()
@@ -36,12 +50,13 @@ async def create_comment(
     db = next(get_db())
     try:
         current_user = await deps.get_current_active_user(request)
-        return crud.comment.create_comment(
-            db=db, 
-            comment=comment_in, 
-            requirement_id=requirement_id, 
+        db_comment = crud.comment.create_comment(
+            db=db,
+            comment=comment_in,
+            requirement_id=requirement_id,
             user_id=current_user.id
         )
+        return db_comment
     finally:
         db.close()
 

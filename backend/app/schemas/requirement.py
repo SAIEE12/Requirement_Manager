@@ -55,7 +55,7 @@ class Requirement(RequirementBase):
     skills: List[SkillBase]
     location: LocationBase
     client: ClientBase
-    comments: List[Comment]
+    comments: Optional[List[Comment]]
 
     class Config:
         from_attributes = True

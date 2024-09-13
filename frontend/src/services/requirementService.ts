@@ -8,6 +8,7 @@ export interface RequirementComment {
   content: string;
   requirement_id: number;
   user_id: number;
+  username: string;
   created_at: string;
 }
 

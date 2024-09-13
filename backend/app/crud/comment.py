@@ -2,10 +2,14 @@
 
 from sqlalchemy.orm import Session
 from app.models.comment import Comment
+from app.models.user import User
 from app.schemas.comment import CommentCreate, CommentUpdate
 
 def get_comments(db: Session, requirement_id: int, skip: int = 0, limit: int = 100):
-    return db.query(Comment).filter(Comment.requirement_id == requirement_id).offset(skip).limit(limit).all()
+    return db.query(Comment, User.username).join(User, Comment.user_id == User.id)\
+        .filter(Comment.requirement_id == requirement_id)\
+        .offset(skip).limit(limit).all()
+
 
 def create_comment(db: Session, comment: CommentCreate, requirement_id: int, user_id: int):
     db_comment = Comment(
@@ -16,6 +20,11 @@ def create_comment(db: Session, comment: CommentCreate, requirement_id: int, use
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)
+    
+    # Fetch the username
+    user = db.query(User).filter(User.id == user_id).first()
+    db_comment.username = user.username if user else "Unknown"
+    
     return db_comment
 
 def update_comment(db: Session, comment_id: int, comment: CommentUpdate):

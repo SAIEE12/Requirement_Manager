@@ -1,27 +1,42 @@
 from sqlalchemy.orm import Session, joinedload
 from app.models.requirement import Requirement
 from app.models.skill import Skill
+from app.models.comment import Comment
 from app.schemas.requirement import RequirementCreate, RequirementUpdate
 from typing import List, Optional
 from datetime import datetime
 
 def get_requirement(db: Session, requirement_id: int):
-    return db.query(Requirement).options(
+    requirement = db.query(Requirement).options(
         joinedload(Requirement.skills),
         joinedload(Requirement.location),
         joinedload(Requirement.client),
         joinedload(Requirement.domain),
-        joinedload(Requirement.status)
+        joinedload(Requirement.status),
+        joinedload(Requirement.comments).joinedload(Comment.user)
     ).filter(Requirement.id == requirement_id).first()
+    
+    if requirement:
+        for comment in requirement.comments:
+            comment.username = comment.user.username
+    
+    return requirement
 
 def get_requirements(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Requirement).options(
+    requirements = db.query(Requirement).options(
         joinedload(Requirement.skills),
         joinedload(Requirement.location),
         joinedload(Requirement.client),
         joinedload(Requirement.domain),
-        joinedload(Requirement.status)
+        joinedload(Requirement.status),
+        joinedload(Requirement.comments).joinedload(Comment.user)
     ).offset(skip).limit(limit).all()
+    
+    for requirement in requirements:
+        for comment in requirement.comments:
+            comment.username = comment.user.username
+    
+    return requirements
 
 def create_requirement(db: Session, requirement: RequirementCreate):
     db_requirement = Requirement(**requirement.dict(exclude={'skill_ids'}))

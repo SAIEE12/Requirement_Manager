@@ -16,6 +16,7 @@ class Comment(CommentBase):
     id: int
     requirement_id: int
     user_id: int
+    username: str 
     created_at: datetime
 
     class Config:
