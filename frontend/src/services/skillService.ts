@@ -1,6 +1,8 @@
-import axios from 'axios';
+// src/services/skillService.ts
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/skills';
+import { apiService } from './apiService';
+
+const API_URL = '/skills'; 
 
 export interface Skill {
   id: number;
@@ -24,25 +26,26 @@ export interface SkillUpdate {
 
 export const skillService = {
   getSkills: async (includeInactive: boolean = false): Promise<Skill[]> => {
-    const response = await axios.get(`${API_URL}?include_inactive=${includeInactive}`);
-    return response.data;
+    console.log('Skill Service: Fetching skills');
+    return apiService.get(`${API_URL}?include_inactive=${includeInactive}`);
   },
 
   getSkill: async (id: number): Promise<Skill> => {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
+    console.log(`Skill Service: Fetching skill with id ${id}`);
+    return apiService.get(`${API_URL}/${id}`);
   },
 
   getSkillsByDomain: async (domainId: number, includeInactive: boolean = false): Promise<Skill[]> => {
-    const response = await axios.get(`${API_URL}/domain/${domainId}?include_inactive=${includeInactive}`);
-    return response.data;
+    console.log(`Skill Service: Fetching skills for domain ${domainId}`);
+    return apiService.get(`${API_URL}/domain/${domainId}?include_inactive=${includeInactive}`);
   },
 
   createSkill: async (skill: SkillCreate): Promise<Skill> => {
+    console.log('Skill Service: Creating new skill', skill);
     try {
-      const response = await axios.post(API_URL, skill);
-      return response.data;
+      return await apiService.post(API_URL, skill);
     } catch (error: any) {
+      console.error('Skill Service: Error creating skill', error);
       if (error.response && error.response.data && error.response.data.detail) {
         throw new Error(error.response.data.detail);
       }
@@ -51,16 +54,17 @@ export const skillService = {
   },
 
   updateSkill: async (id: number, skill: SkillUpdate): Promise<Skill> => {
-    const response = await axios.put(`${API_URL}/${id}`, skill);
-    return response.data;
+    console.log(`Skill Service: Updating skill with id ${id}`, skill);
+    return apiService.put(`${API_URL}/${id}`, skill);
   },
 
   deleteSkill: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/${id}`);
+    console.log(`Skill Service: Deleting skill with id ${id}`);
+    return apiService.delete(`${API_URL}/${id}`);
   },
 
   reactivateSkill: async (id: number): Promise<Skill> => {
-    const response = await axios.post(`${API_URL}/${id}/reactivate`);
-    return response.data;
+    console.log(`Skill Service: Reactivating skill with id ${id}`);
+    return apiService.post(`${API_URL}/${id}/reactivate`);
   }
 };

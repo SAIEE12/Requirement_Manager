@@ -1,8 +1,8 @@
 // src/services/roleService.ts
 
-import axios from 'axios';
+import { apiService } from './apiService';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_URL = '/roles';  // Note: We remove the full URL as it's handled in apiService
 
 export interface Role {
   id: number;
@@ -12,21 +12,22 @@ export interface Role {
 
 export const roleService = {
   getRoles: async (): Promise<Role[]> => {
-    const response = await axios.get(`${API_URL}/roles/`);
-    return response.data;
+    console.log('Role Service: Fetching roles');
+    return apiService.get(`${API_URL}/`);
   },
 
   createRole: async (roleData: Omit<Role, 'id'>): Promise<Role> => {
-    const response = await axios.post(`${API_URL}/roles/`, roleData);
-    return response.data;
+    console.log('Role Service: Creating new role', roleData);
+    return apiService.post(`${API_URL}/`, roleData);
   },
 
   updateRole: async (id: number, roleData: Partial<Omit<Role, 'id'>>): Promise<Role> => {
-    const response = await axios.put(`${API_URL}/roles/${id}/`, roleData);
-    return response.data;
+    console.log(`Role Service: Updating role with id ${id}`, roleData);
+    return apiService.put(`${API_URL}/${id}/`, roleData);
   },
 
   deleteRole: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/roles/${id}/`);
+    console.log(`Role Service: Deleting role with id ${id}`);
+    return apiService.delete(`${API_URL}/${id}/`);
   },
 };

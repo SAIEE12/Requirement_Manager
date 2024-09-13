@@ -1,24 +1,48 @@
-import axios from 'axios';
+// src/services/auth.ts
+
+import { apiService, setToken } from './apiService';
 
 const API_URL = 'http://localhost:8000/api';
 
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+console.log('Auth Service: Initializing with base URL:', API_URL);
+
+interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
 
 export const login = async (credentials: { username: string; password: string }) => {
-  const response = await axiosInstance.post('/auth/login', new URLSearchParams({
-    username: credentials.username,
-    password: credentials.password
-  }), {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  });
+  try {
+    const response = await apiService.post<LoginResponse>(
+      '/auth/login', 
+      new URLSearchParams({
+        username: credentials.username,
+        password: credentials.password
+      }).toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
 
-  if (response.data.access_token) {
-    localStorage.setItem('token', response.data.access_token);
+
+    if (response.access_token) {
+      setToken(response.access_token);
+    }
+
+    return response;
+  } catch (error) {
+    throw error;
   }
-  return response.data;
+};
+
+export const logout = () => {
+  localStorage.removeItem('token');
+};
+
+export const isAuthenticated = (): boolean => {
+  const token = localStorage.getItem('token');
+  const authenticated = !!token;
+  return authenticated;
 };

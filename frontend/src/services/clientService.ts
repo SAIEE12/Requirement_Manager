@@ -1,6 +1,8 @@
-import axios from 'axios';
+// src/services/clientService.ts
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/clients';
+import { apiService } from './apiService';
+
+const API_URL = '/clients';  
 
 export interface Client {
   id: number;
@@ -34,31 +36,32 @@ export interface ClientUpdate {
 
 export const clientService = {
   getClients: async (includeInactive: boolean = false): Promise<Client[]> => {
-    const response = await axios.get(`${API_URL}?include_inactive=${includeInactive}`);
-    return response.data;
+    console.log('Client Service: Fetching clients');
+    return apiService.get(`${API_URL}?include_inactive=${includeInactive}`);
   },
 
   getClient: async (id: number): Promise<Client> => {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
+    console.log(`Client Service: Fetching client with id ${id}`);
+    return apiService.get(`${API_URL}/${id}`);
   },
 
   createClient: async (client: ClientCreate): Promise<Client> => {
-    const response = await axios.post(API_URL, client);
-    return response.data;
+    console.log('Client Service: Creating new client', client);
+    return apiService.post(API_URL, client);
   },
 
   updateClient: async (id: number, client: ClientUpdate): Promise<Client> => {
-    const response = await axios.put(`${API_URL}/${id}`, client);
-    return response.data;
+    console.log(`Client Service: Updating client with id ${id}`, client);
+    return apiService.put(`${API_URL}/${id}`, client);
   },
 
   deleteClient: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/${id}`);
+    console.log(`Client Service: Deleting client with id ${id}`);
+    return apiService.delete(`${API_URL}/${id}`);
   },
 
   reactivateClient: async (id: number): Promise<Client> => {
-    const response = await axios.post(`${API_URL}/${id}/reactivate`);
-    return response.data;
+    console.log(`Client Service: Reactivating client with id ${id}`);
+    return apiService.post(`${API_URL}/${id}/reactivate`);
   }
 };

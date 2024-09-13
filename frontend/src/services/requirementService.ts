@@ -1,15 +1,7 @@
-import axios from 'axios';
+// src/services/requirementService.ts
+
+import { apiService } from './apiService';
 import { Client, Location } from '../types/types';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
-export interface Comment {
-  id: number;
-  content: string;
-  requirement_id: number;
-  user_id: number;
-  created_at: string;
-}
 
 export interface RequirementComment {
   id: number;
@@ -50,50 +42,52 @@ export interface RequirementUpdate {
   notes?: string;
 }
 
-
-
 export const requirementService = {
   getRequirements: async (): Promise<Requirement[]> => {
-    const response = await axios.get(`${API_URL}/requirements`);
-    return response.data;
+    return apiService.get<Requirement[]>('/requirements');
   },
 
   getRequirement: async (id: number): Promise<Requirement> => {
-    const response = await axios.get(`${API_URL}/requirements/${id}`);
-    return response.data;
+    return apiService.get<Requirement>(`/requirements/${id}`);
   },
 
   createRequirement: async (requirement: RequirementCreate): Promise<Requirement> => {
-    const response = await axios.post(`${API_URL}/requirements`, requirement);
-    return response.data;
+    return apiService.post<Requirement>('/requirements', requirement);
   },
 
   updateRequirement: async (id: number, requirement: RequirementUpdate): Promise<Requirement> => {
-    const response = await axios.put(`${API_URL}/requirements/${id}`, requirement);
-    return response.data;
+    return apiService.put<Requirement>(`/requirements/${id}`, requirement);
   },
 
   deleteRequirement: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/requirements/${id}`);
+    return apiService.delete<void>(`/requirements/${id}`);
   },
 
   getClients: async (): Promise<Client[]> => {
-    const response = await axios.get(`${API_URL}/clients`);
-    return response.data;
+    return apiService.get<Client[]>('/clients');
   },
 
   getLocations: async (): Promise<Location[]> => {
-    const response = await axios.get(`${API_URL}/locations`);
-    return response.data;
+    return apiService.get<Location[]>('/locations');
   },
 
   getComments: async (requirementId: number): Promise<RequirementComment[]> => {
-    const response = await axios.get(`${API_URL}/requirements/${requirementId}/comments`);
-    return response.data;
+    console.log(`Fetching comments`);
+    return apiService.get<RequirementComment[]>(`/requirements/${requirementId}/comments`);
   },
 
   addComment: async (requirementId: number, content: string): Promise<RequirementComment> => {
-    const response = await axios.post(`${API_URL}/requirements/${requirementId}/comments`, { content });
-    return response.data;
+    console.log(`requirementService: Adding comment for requirement ${requirementId}`);
+    try {
+      const response = await apiService.post<RequirementComment>(
+        `/requirements/${requirementId}/comments`, 
+        { content }
+      );
+      console.log('requirementService: Comment added successfully', response);
+      return response;
+    } catch (error) {
+      console.error('requirementService: Error adding comment:', error);
+      throw error;
+    }
   },
 };

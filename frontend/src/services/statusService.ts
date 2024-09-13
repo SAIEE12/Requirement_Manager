@@ -1,7 +1,8 @@
-import axios from 'axios';
+// src/services/statusService.ts
 
-// const API_URL = '/api/status'; // Adjust this if your API base URL is different
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+import { apiService } from './apiService';
+
+const API_URL = '/status';  
 
 export interface Status {
   id: number;
@@ -24,50 +25,51 @@ export interface StatusUpdate {
 
 export const statusService = {
   getStatuses: async (): Promise<Status[]> => {
+    console.log('Status Service: Fetching statuses');
     try {
-      const response = await axios.get(`${API_URL}/status/`);
-      return response.data;
+      return await apiService.get(`${API_URL}/`);
     } catch (error) {
-      console.error('Error fetching statuses:', error);
+      console.error('Status Service: Error fetching statuses:', error);
       throw error;
     }
   },
 
   getStatus: async (id: number): Promise<Status> => {
+    console.log(`Status Service: Fetching status with id ${id}`);
     try {
-      const response = await axios.get(`${API_URL}/status/${id}`);
-      return response.data;
+      return await apiService.get(`${API_URL}/${id}`);
     } catch (error) {
-      console.error(`Error fetching status with id ${id}:`, error);
+      console.error(`Status Service: Error fetching status with id ${id}:`, error);
       throw error;
     }
   },
 
   createStatus: async (status: StatusCreate): Promise<Status> => {
+    console.log('Status Service: Creating new status', status);
     try {
-      const response = await axios.post(`${API_URL}/status/`, status);
-      return response.data;
+      return await apiService.post(`${API_URL}/`, status);
     } catch (error) {
-      console.error('Error creating status:', error);
+      console.error('Status Service: Error creating status:', error);
       throw error;
     }
   },
 
   updateStatus: async (id: number, status: StatusUpdate): Promise<Status> => {
+    console.log(`Status Service: Updating status with id ${id}`, status);
     try {
-      const response = await axios.put(`${API_URL}/status/${id}`, status);
-      return response.data;
+      return await apiService.put(`${API_URL}/${id}`, status);
     } catch (error) {
-      console.error(`Error updating status with id ${id}:`, error);
+      console.error(`Status Service: Error updating status with id ${id}:`, error);
       throw error;
     }
   },
 
   deleteStatus: async (id: number): Promise<void> => {
+    console.log(`Status Service: Deleting status with id ${id}`);
     try {
-      await axios.delete(`${API_URL}/status/${id}`);
+      await apiService.delete(`${API_URL}/${id}`);
     } catch (error) {
-      console.error(`Error deleting status with id ${id}:`, error);
+      console.error(`Status Service: Error deleting status with id ${id}:`, error);
       throw error;
     }
   }

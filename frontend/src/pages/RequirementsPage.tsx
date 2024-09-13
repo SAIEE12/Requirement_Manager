@@ -187,6 +187,7 @@ const RequirementsPage: React.FC = () => {
   const handleAddComment = async () => {
     if (!selectedRequirement || !newComment.trim()) return;
     try {
+      console.log('Adding comment from Page, ', newComment);
       const addedComment = await requirementService.addComment(selectedRequirement.id, newComment);
       setComments(prevComments => [...prevComments, addedComment]);
       setNewComment('');

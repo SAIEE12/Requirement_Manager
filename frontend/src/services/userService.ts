@@ -1,7 +1,8 @@
-import axios from 'axios';
+// src/services/userService.ts
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+import { apiService } from './apiService';
 
+const API_URL = '/users';  
 export interface User {
   id: number;
   username: string;
@@ -18,21 +19,42 @@ export interface Role {
 
 export const userService = {
   getUsers: async (): Promise<User[]> => {
-    const response = await axios.get(`${API_URL}/users/`);
-    return response.data;
+    console.log('User Service: Fetching users');
+    try {
+      return await apiService.get(`${API_URL}/`);
+    } catch (error) {
+      console.error('User Service: Error fetching users:', error);
+      throw error;
+    }
   },
 
   updateUser: async (id: number, userData: Partial<User>): Promise<User> => {
-    const response = await axios.put(`${API_URL}/users/${id}/`, userData);
-    return response.data;
+    console.log(`User Service: Updating user with id ${id}`, userData);
+    try {
+      return await apiService.put(`${API_URL}/${id}/`, userData);
+    } catch (error) {
+      console.error(`User Service: Error updating user with id ${id}:`, error);
+      throw error;
+    }
   },
 
   createUser: async (userData: Omit<User, 'id'>): Promise<User> => {
-    const response = await axios.post(`${API_URL}/users/`, userData);
-    return response.data;
+    console.log('User Service: Creating new user', userData);
+    try {
+      return await apiService.post(`${API_URL}/`, userData);
+    } catch (error) {
+      console.error('User Service: Error creating user:', error);
+      throw error;
+    }
   },
 
   deleteUser: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/users/${id}/`);
+    console.log(`User Service: Deleting user with id ${id}`);
+    try {
+      await apiService.delete(`${API_URL}/${id}/`);
+    } catch (error) {
+      console.error(`User Service: Error deleting user with id ${id}:`, error);
+      throw error;
+    }
   },
 };

@@ -1,7 +1,8 @@
-import axios from 'axios';
+// src/services/domainService.ts
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/domains';
+import { apiService } from './apiService';
 
+const API_URL = '/domains';  
 export interface Domain {
   id: number;
   name: string;
@@ -21,20 +22,21 @@ export interface DomainUpdate {
 
 export const domainService = {
   getDomains: async (includeInactive: boolean = false): Promise<Domain[]> => {
-    const response = await axios.get(`${API_URL}?include_inactive=${includeInactive}`);
-    return response.data;
+    console.log('Domain Service: Fetching domains');
+    return apiService.get(`${API_URL}?include_inactive=${includeInactive}`);
   },
 
   getDomain: async (id: number): Promise<Domain> => {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
+    console.log(`Domain Service: Fetching domain with id ${id}`);
+    return apiService.get(`${API_URL}/${id}`);
   },
 
   createDomain: async (domain: DomainCreate): Promise<Domain> => {
+    console.log('Domain Service: Creating new domain', domain);
     try {
-      const response = await axios.post(API_URL, domain);
-      return response.data;
+      return await apiService.post(API_URL, domain);
     } catch (error: any) {
+      console.error('Domain Service: Error creating domain', error);
       if (error.response && error.response.data && error.response.data.detail) {
         throw new Error(error.response.data.detail);
       }
@@ -43,16 +45,17 @@ export const domainService = {
   },
 
   updateDomain: async (id: number, domain: DomainUpdate): Promise<Domain> => {
-    const response = await axios.put(`${API_URL}/${id}`, domain);
-    return response.data;
+    console.log(`Domain Service: Updating domain with id ${id}`, domain);
+    return apiService.put(`${API_URL}/${id}`, domain);
   },
 
   deleteDomain: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/${id}`);
+    console.log(`Domain Service: Deleting domain with id ${id}`);
+    return apiService.delete(`${API_URL}/${id}`);
   },
 
   reactivateDomain: async (id: number): Promise<Domain> => {
-    const response = await axios.post(`${API_URL}/${id}/reactivate`);
-    return response.data;
+    console.log(`Domain Service: Reactivating domain with id ${id}`);
+    return apiService.post(`${API_URL}/${id}/reactivate`);
   }
 };
