@@ -33,6 +33,10 @@ import {
   CardActions,
   Chip,
 } from '@mui/material';
+import {
+  FilterList as FilterListIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -42,29 +46,6 @@ import { Client, Location } from '../types/types';
 import { differenceInDays } from 'date-fns';
 import { getDomainIcon, getDomainColor } from '../utils/domainIcons';
 import { getStatusIcon, getStatusColor } from '../utils/statusIcons';
-
-// const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-//   switch (status.toLowerCase()) {
-//     case 'active':
-//       return 'success';
-//     case 'on hold':
-//       return 'warning';
-//     case 'closed':
-//       return 'default';
-//     case 'filled':
-//       return 'primary';
-//     case 'cancelled':
-//       return 'error';
-//     case 'priority':
-//       return 'secondary';
-//     case 'archived':
-//       return 'info';
-//     case 'depricated': // Note: This might be a typo. Did you mean "Deprecated"?
-//       return 'error';
-//     default:
-//       return 'default';
-//   }
-// };
 
 const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -250,97 +231,100 @@ const RequirementsPage: React.FC = () => {
 
   return (
     <Container maxWidth="xl">
-      <Typography variant="h4" gutterBottom>
-        Requirement Management
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={() => handleOpenDialog()}
-        style={{ marginBottom: '20px' }}
-      >
-        Add New Requirement
-      </Button>
-      {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">Requirement Management</Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpenDialog()}
+        >
+          Add New Requirement
+        </Button>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
       <Grid container spacing={3}>
-        {/* Left side - Requirements List */}
-        
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} style={{ padding: '20px', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-            <Box display="flex" justifyContent="space-between" mb={2}>
-              <FormControl style={{ minWidth: 200 }}>
-                <InputLabel>Filter by Client</InputLabel>
-                <Select
-                  value={filterClient}
-                  onChange={(e) => setFilterClient(e.target.value as string)}
-                >
-                  <MenuItem value="">All Clients</MenuItem>
-                  {clients.map((client) => (
-                    <MenuItem key={client.id} value={client.id.toString()}>
-                      {client.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl style={{ minWidth: 200 }}>
-                <InputLabel>Filter by Location</InputLabel>
-                <Select
-                  value={filterLocation}
-                  onChange={(e) => setFilterLocation(e.target.value as string)}
-                >
-                  <MenuItem value="">All Locations</MenuItem>
-                  {locations.map((location) => (
-                    <MenuItem key={location.id} value={location.id.toString()}>
-                      {location.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-  
-            <Box flexGrow={1} overflow="auto">
+      {/* Left side - Requirements List */}
+      <Grid item xs={12} md={7}>
+        <Paper elevation={3} sx={{ p: 2, height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Filter by Client</InputLabel>
+              <Select
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value as string)}
+              >
+                <MenuItem value="">All Clients</MenuItem>
+                {clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id.toString()}>
+                    {client.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Filter by Location</InputLabel>
+              <Select
+                value={filterLocation}
+                onChange={(e) => setFilterLocation(e.target.value as string)}
+              >
+                <MenuItem value="">All Locations</MenuItem>
+                {locations.map((location) => (
+                  <MenuItem key={location.id} value={location.id.toString()}>
+                    {location.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          
+          <Box flexGrow={1} overflow="auto">
             {filteredRequirements.map((requirement) => (
               <Card 
                 key={requirement.id}
-                raised 
-                style={{ 
-                  cursor: 'pointer', 
-                  marginBottom: '10px',
-                  transition: 'box-shadow 0.3s',
-                  backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
-                  height: '150px',
-                  position: 'relative',
-                }}
+                raised={selectedRequirement?.id === requirement.id}
                 onClick={() => handleRequirementClick(requirement)}
                 sx={{
-                  '&:hover': {
-                    boxShadow: 6,
-                  },
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 },
+                  mb: 2,
                 }}
               >
-                <CardContent style={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
-                  {/* Left side */}
-                  <Box flexGrow={1} pr={1}>
-                    <Typography variant="body2" color="textSecondary">
-                      ID: {requirement.id}
-                    </Typography>
-                    <Chip
-                      icon={React.createElement(getDomainIcon(requirement.domain.name))}
-                      label={requirement.domain.name}
-                      size="small"
-                      style={{
-                        backgroundColor: getDomainColor(requirement.domain.name),
-                        color: 'white',
-                        fontWeight: 'bold',
-                      }}
-                    />
+                <CardContent sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Box flexGrow={1}>
+                    <Box display="flex" alignItems="center" mb={1}>
+                      <Typography variant="subtitle1" fontWeight="bold" mr={1}>
+                        ID: {requirement.id}
+                      </Typography>
+                      <Chip
+                        icon={React.createElement(getDomainIcon(requirement.domain.name))}
+                        label={requirement.domain.name}
+                        size="small"
+                        sx={{
+                          backgroundColor: getDomainColor(requirement.domain.name),
+                          color: 'white',
+                          fontWeight: 'bold',
+                          mr: 1,
+                        }}
+                      />
+                      <Chip
+                        icon={React.createElement(getStatusIcon(requirement.status.name))}
+                        label={requirement.status.name}
+                        size="small"
+                        sx={{
+                          backgroundColor: getStatusColor(requirement.status.name),
+                          color: 'white',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </Box>
                     <Typography 
                       variant="body2" 
-                      style={{
-                        marginTop: '5px',
-                        marginBottom: '5px',
+                      sx={{
+                        mb: 1,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
@@ -348,87 +332,55 @@ const RequirementsPage: React.FC = () => {
                         WebkitBoxOrient: 'vertical',
                       }}
                     >
-                      {requirement.description.length > 70 
-                        ? `${requirement.description.substring(0, 70)}...` 
-                        : requirement.description}
+                      {requirement.description}
                     </Typography>
                     <Typography variant="body2">
                       Experience: {requirement.experience_min} - {requirement.experience_max} years
                     </Typography>
-                    <Typography variant="body2" >
-                      Since: {requirement.days_open || calculateDaysOpen(requirement.created_at)} days
-                    </Typography>
                   </Box>
-              
-                  {/* Right side */}
-                  <Box minWidth="120px" textAlign="right">
-                    <Typography 
-                      variant="body2" 
-                      color="textSecondary" 
-                      style={{ 
-                        fontWeight: 'bold',
-                        marginBottom: '5px',
-                      }}
-                    >
+                  <Box textAlign="right" ml={2}>
+                    <Typography variant="body2" fontWeight="bold">
                       {requirement.client.name}
                     </Typography>
                     <Typography variant="body2">
                       {requirement.location.name}
                     </Typography>
-                    <Chip
-                      icon={React.createElement(getStatusIcon(requirement.status.name))}
-                      label={requirement.status.name}
-                      size="small"
-                      style={{
-                        backgroundColor: getStatusColor(requirement.status.name),
-                        color: 'white',
-                        fontWeight: 'bold',
-                      }}
-                    />
+                    <Typography variant="caption" color="text.secondary">
+                      Open for {requirement.days_open || calculateDaysOpen(requirement.created_at)} days
+                    </Typography>
                   </Box>
                 </CardContent>
-                <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
-                  <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
+                <CardActions sx={{ justifyContent: 'flex-end' }}>
+                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
+                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }}>
                     <DeleteIcon />
                   </IconButton>
                 </CardActions>
               </Card>
             ))}
           </Box>
-          </Paper>
-        </Grid>
-  
-        {/* Right side - Requirement Details */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} style={{ padding: '20px', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-            {selectedRequirement ? (
-              <>
-               <Typography variant="h5" gutterBottom>
-                Requirement Details
-              </Typography>
-              <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
-              <Box display="flex" alignItems="center" mb={2}>
-                  <Chip
-                    icon={React.createElement(getDomainIcon(selectedRequirement.domain.name))}
-                    label={selectedRequirement.domain.name}
-                    style={{
-                      backgroundColor: getDomainColor(selectedRequirement.domain.name),
-                      color: 'white',
-                      fontWeight: 'bold',
-                    }}
-                  />
+        </Paper>
+      </Grid>
+
+      {/* Right side - Requirement Details */}
+      <Grid item xs={12} md={5}>
+        <Paper elevation={3} sx={{ p: 2, height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          {selectedRequirement ? (
+            <>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h5">Requirement Details</Typography>
+                <IconButton onClick={() => setSelectedRequirement(null)}>
+                  <CloseIcon />
+                </IconButton>
               </Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="body1">
-                  <strong>Created:</strong> {new Date(selectedRequirement.created_at).toLocaleString()}
-                </Typography>
+                <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
                 <Chip
                   icon={React.createElement(getStatusIcon(selectedRequirement.status.name))}
                   label={selectedRequirement.status.name}
-                  style={{
+                  sx={{
                     backgroundColor: getStatusColor(selectedRequirement.status.name),
                     color: 'white',
                     fontWeight: 'bold',
@@ -438,34 +390,64 @@ const RequirementsPage: React.FC = () => {
               <Typography variant="body1" paragraph>
                 <strong>Description:</strong> {selectedRequirement.description}
               </Typography>
-              <Paper elevation={1} style={{ padding: '10px', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
-                <Typography variant="body1">
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <Paper elevation={1} sx={{ p: 1, bgcolor: 'grey.100' }}>
+                    <Typography variant="body2">
+                      <strong>Client:</strong> {selectedRequirement.client.name}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper elevation={1} sx={{ p: 1, bgcolor: 'grey.100' }}>
+                    <Typography variant="body2">
+                      <strong>Location:</strong> {selectedRequirement.location.name}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper elevation={1} sx={{ p: 1, bgcolor: 'grey.100' }}>
+                    <Typography variant="body2">
+                      <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper elevation={1} sx={{ p: 1, bgcolor: 'grey.100' }}>
+                    <Typography variant="body2">
+                      <strong>Created:</strong> {new Date(selectedRequirement.created_at).toLocaleDateString()}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+              <Paper elevation={1} sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
+                <Typography variant="body2">
                   <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
                 </Typography>
               </Paper>
-              <Typography variant="body1">
-                <strong>Client:</strong> {selectedRequirement.client.name}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
-              </Typography>
-              <Typography variant="body1">
-                <strong>Location:</strong> {selectedRequirement.location.name}
-              </Typography>
-  
-                <Typography variant="h6" gutterBottom>
-                  Comments
-                </Typography>
+                <Typography variant="h6" gutterBottom>Comments</Typography>
                 <List>
                   {comments.map((comment, index) => (
                     <React.Fragment key={comment.id}>
-                      <ListItem>
+                      <ListItem alignItems="flex-start">
                         <ListItemText
                           primary={comment.content}
-                          secondary={`${comment.username} | ${new Date(comment.created_at).toLocaleString()}`}
+                          secondary={
+                            <React.Fragment>
+                              <Typography
+                                sx={{ display: 'inline' }}
+                                component="span"
+                                variant="body2"
+                                color="text.primary"
+                              >
+                                {comment.username}
+                              </Typography>
+                              {` — ${new Date(comment.created_at).toLocaleString()}`}
+                            </React.Fragment>
+                          }
                         />
                       </ListItem>
-                      {index < comments.length - 1 && <Divider />}
+                      {index < comments.length - 1 && <Divider variant="inset" component="li" />}
                     </React.Fragment>
                   ))}
                 </List>
@@ -482,14 +464,14 @@ const RequirementsPage: React.FC = () => {
                     color="primary"
                     onClick={handleAddComment}
                     disabled={!newComment.trim()}
-                    style={{ marginLeft: '10px' }}
+                    sx={{ ml: 1 }}
                   >
-                    Add Comment
+                    Add
                   </Button>
                 </Box>
               </>
             ) : (
-              <Typography variant="h6" color="textSecondary" style={{ textAlign: 'center', marginTop: '20px' }}>
+              <Typography variant="h6" color="text.secondary" sx={{ textAlign: 'center', mt: 3 }}>
                 Select a requirement to view details
               </Typography>
             )}
