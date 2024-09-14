@@ -28,6 +28,14 @@ class ClientBase(BaseModel):
     class Config:
         from_attributes = True
 
+class StatusBase(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 class RequirementBase(BaseModel):
     description: str
     client_id: int
@@ -55,6 +63,7 @@ class Requirement(RequirementBase):
     skills: List[SkillBase]
     location: LocationBase
     client: ClientBase
+    status: StatusBase
     days_open: Optional[int] = None
     comments: Optional[List[Comment]]
 

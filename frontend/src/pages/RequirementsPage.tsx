@@ -31,6 +31,7 @@ import {
   Card,
   CardContent,
   CardActions,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,6 +40,29 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { requirementService, Requirement, RequirementCreate, RequirementUpdate, RequirementComment } from '../services/requirementService';
 import { Client, Location } from '../types/types';
 import { differenceInDays } from 'date-fns';
+
+const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+  switch (status.toLowerCase()) {
+    case 'active':
+      return 'success';
+    case 'on hold':
+      return 'warning';
+    case 'closed':
+      return 'default';
+    case 'filled':
+      return 'primary';
+    case 'cancelled':
+      return 'error';
+    case 'priority':
+      return 'secondary';
+    case 'archived':
+      return 'info';
+    case 'depricated': // Note: This might be a typo. Did you mean "Deprecated"?
+      return 'error';
+    default:
+      return 'default';
+  }
+};
 
 const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -277,79 +301,85 @@ const RequirementsPage: React.FC = () => {
             <Box flexGrow={1} overflow="auto">
             {filteredRequirements.map((requirement) => (
               <Card 
-              key={requirement.id}
-              raised 
-              style={{ 
-                cursor: 'pointer', 
-                marginBottom: '10px',
-                transition: 'box-shadow 0.3s',
-                backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
-                height: '150px',
-                position: 'relative',
-              }}
-              onClick={() => handleRequirementClick(requirement)}
-              sx={{
-                '&:hover': {
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent style={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
-                {/* Left side */}
-                <Box flexGrow={1} pr={1}>
-                  <Typography variant="body2" color="textSecondary">
-                    ID: {requirement.id}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    style={{
-                      marginTop: '5px',
-                      marginBottom: '5px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {requirement.description.length > 70 
-                      ? `${requirement.description.substring(0, 70)}...` 
-                      : requirement.description}
-                  </Typography>
-                  <Typography variant="body2">
-                    Experience: {requirement.experience_min} - {requirement.experience_max} years
-                  </Typography>
-                  <Typography variant="body2" >
-                    Since: {requirement.days_open || calculateDaysOpen(requirement.created_at)} days
-                  </Typography>
-                </Box>
-            
-                {/* Right side */}
-                <Box minWidth="120px" textAlign="right">
-                  <Typography 
-                    variant="body2" 
-                    color="textSecondary" 
-                    style={{ 
-                      fontWeight: 'bold',
-                      marginBottom: '5px',
-                    }}
-                  >
-                    {requirement.client.name}
-                  </Typography>
-                  <Typography variant="body2">
-                    {requirement.location.name}
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
-                <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
+                key={requirement.id}
+                raised 
+                style={{ 
+                  cursor: 'pointer', 
+                  marginBottom: '10px',
+                  transition: 'box-shadow 0.3s',
+                  backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
+                  height: '150px',
+                  position: 'relative',
+                }}
+                onClick={() => handleRequirementClick(requirement)}
+                sx={{
+                  '&:hover': {
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardContent style={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
+                  {/* Left side */}
+                  <Box flexGrow={1} pr={1}>
+                    <Typography variant="body2" color="textSecondary">
+                      ID: {requirement.id}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      style={{
+                        marginTop: '5px',
+                        marginBottom: '5px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {requirement.description.length > 70 
+                        ? `${requirement.description.substring(0, 70)}...` 
+                        : requirement.description}
+                    </Typography>
+                    <Typography variant="body2">
+                      Experience: {requirement.experience_min} - {requirement.experience_max} years
+                    </Typography>
+                    <Typography variant="body2" >
+                      Since: {requirement.days_open || calculateDaysOpen(requirement.created_at)} days
+                    </Typography>
+                  </Box>
+              
+                  {/* Right side */}
+                  <Box minWidth="120px" textAlign="right">
+                    <Typography 
+                      variant="body2" 
+                      color="textSecondary" 
+                      style={{ 
+                        fontWeight: 'bold',
+                        marginBottom: '5px',
+                      }}
+                    >
+                      {requirement.client.name}
+                    </Typography>
+                    <Typography variant="body2">
+                      {requirement.location.name}
+                    </Typography>
+                    <Chip
+                      label={requirement.status.name}
+                      size="small"
+                      style={{ marginTop: '5px' }}
+                      color={getStatusColor(requirement.status.name)}
+                    />
+                  </Box>
+                </CardContent>
+                <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
             ))}
           </Box>
           </Paper>
@@ -360,25 +390,38 @@ const RequirementsPage: React.FC = () => {
           <Paper elevation={3} style={{ padding: '20px', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
             {selectedRequirement ? (
               <>
-                <Typography variant="h5" gutterBottom>
-                  Requirement Details
-                </Typography>
-                <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
-                <Typography variant="body1" paragraph>
-                  <strong>Description:</strong> {selectedRequirement.description}
-                </Typography>
+               <Typography variant="h5" gutterBottom>
+                Requirement Details
+              </Typography>
+              <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="body1">
-                  <strong>Client:</strong> {selectedRequirement.client.name}
+                  <strong>Created:</strong> {new Date(selectedRequirement.created_at).toLocaleString()}
                 </Typography>
+                <Chip
+                  label={selectedRequirement.status.name}
+                  size="small"
+                  style={{ marginTop: '5px' }}
+                  color={getStatusColor(selectedRequirement.status.name)}
+                />
+              </Box>
+              <Typography variant="body1" paragraph>
+                <strong>Description:</strong> {selectedRequirement.description}
+              </Typography>
+              <Paper elevation={1} style={{ padding: '10px', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
                 <Typography variant="body1">
-                  <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Location:</strong> {selectedRequirement.location.name}
-                </Typography>
-                <Typography variant="body1" paragraph>
                   <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
                 </Typography>
+              </Paper>
+              <Typography variant="body1">
+                <strong>Client:</strong> {selectedRequirement.client.name}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
+              </Typography>
+              <Typography variant="body1">
+                <strong>Location:</strong> {selectedRequirement.location.name}
+              </Typography>
   
                 <Typography variant="h6" gutterBottom>
                   Comments

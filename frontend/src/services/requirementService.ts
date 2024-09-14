@@ -3,6 +3,11 @@
 import { apiService } from './apiService';
 import { Client, Location } from '../types/types';
 
+interface Status {
+  id: number;
+  name: string;
+}
+
 export interface RequirementComment {
   id: number;
   content: string;
@@ -22,6 +27,7 @@ export interface Requirement {
   location_id: number;
   location: Location;
   notes?: string;
+  status: Status;
   comments?: RequirementComment[];
   created_at: string; 
   days_open: number; 
