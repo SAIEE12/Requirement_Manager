@@ -38,6 +38,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { requirementService, Requirement, RequirementCreate, RequirementUpdate, RequirementComment } from '../services/requirementService';
 import { Client, Location } from '../types/types';
+import { differenceInDays } from 'date-fns';
 
 const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -99,6 +100,12 @@ const RequirementsPage: React.FC = () => {
     } catch (err) {
       console.error('Error fetching locations:', err);
     }
+  };
+
+  const calculateDaysOpen = (createdAt: string) => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    return differenceInDays(now, created);
   };
 
   const handleOpenDialog = (requirement: Requirement | null = null) => {
@@ -270,69 +277,79 @@ const RequirementsPage: React.FC = () => {
             <Box flexGrow={1} overflow="auto">
             {filteredRequirements.map((requirement) => (
               <Card 
-                key={requirement.id}
-                raised 
-                style={{ 
-                  cursor: 'pointer', 
-                  marginBottom: '10px',
-                  transition: 'box-shadow 0.3s',
-                  backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
-                  height: '150px',
-                  position: 'relative',
-                }}
-                onClick={() => handleRequirementClick(requirement)}
-                sx={{
-                  '&:hover': {
-                    boxShadow: 6,
-                  },
-                }}
-              >
-                <CardContent style={{ height: '100%', overflow: 'hidden' }}>
-                  <Typography 
-                    variant="body2" 
-                    color="textSecondary" 
-                    style={{ 
-                      position: 'absolute', 
-                      top: '10px', 
-                      right: '10px',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {requirement.client.name}
-                  </Typography>
+              key={requirement.id}
+              raised 
+              style={{ 
+                cursor: 'pointer', 
+                marginBottom: '10px',
+                transition: 'box-shadow 0.3s',
+                backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
+                height: '150px',
+                position: 'relative',
+              }}
+              onClick={() => handleRequirementClick(requirement)}
+              sx={{
+                '&:hover': {
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent style={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
+                {/* Left side */}
+                <Box flexGrow={1} pr={1}>
                   <Typography variant="body2" color="textSecondary">
                     ID: {requirement.id}
                   </Typography>
                   <Typography 
                     variant="body2" 
                     style={{
-                      marginTop: '10px',
-                      marginBottom: '10px',
+                      marginTop: '5px',
+                      marginBottom: '5px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
-                      WebkitLineClamp: 3,
+                      WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    {requirement.description}
+                    {requirement.description.length > 70 
+                      ? `${requirement.description.substring(0, 70)}...` 
+                      : requirement.description}
                   </Typography>
                   <Typography variant="body2">
                     Experience: {requirement.experience_min} - {requirement.experience_max} years
                   </Typography>
-                  <Typography variant="body2">
-                    Location: {requirement.location.name}
+                  <Typography variant="body2" >
+                    Since: {requirement.days_open || calculateDaysOpen(requirement.created_at)} days
                   </Typography>
-                </CardContent>
-                <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
-                  <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
-                    <DeleteIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
+                </Box>
+            
+                {/* Right side */}
+                <Box minWidth="120px" textAlign="right">
+                  <Typography 
+                    variant="body2" 
+                    color="textSecondary" 
+                    style={{ 
+                      fontWeight: 'bold',
+                      marginBottom: '5px',
+                    }}
+                  >
+                    {requirement.client.name}
+                  </Typography>
+                  <Typography variant="body2">
+                    {requirement.location.name}
+                  </Typography>
+                </Box>
+              </CardContent>
+              <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
+                <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
             ))}
           </Box>
           </Paper>

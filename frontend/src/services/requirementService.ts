@@ -23,6 +23,8 @@ export interface Requirement {
   location: Location;
   notes?: string;
   comments?: RequirementComment[];
+  created_at: string; 
+  days_open: number; 
 }
 
 export interface RequirementCreate {
