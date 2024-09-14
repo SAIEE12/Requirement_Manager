@@ -40,29 +40,31 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { requirementService, Requirement, RequirementCreate, RequirementUpdate, RequirementComment } from '../services/requirementService';
 import { Client, Location } from '../types/types';
 import { differenceInDays } from 'date-fns';
+import { getDomainIcon, getDomainColor } from '../utils/domainIcons';
+import { getStatusIcon, getStatusColor } from '../utils/statusIcons';
 
-const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-  switch (status.toLowerCase()) {
-    case 'active':
-      return 'success';
-    case 'on hold':
-      return 'warning';
-    case 'closed':
-      return 'default';
-    case 'filled':
-      return 'primary';
-    case 'cancelled':
-      return 'error';
-    case 'priority':
-      return 'secondary';
-    case 'archived':
-      return 'info';
-    case 'depricated': // Note: This might be a typo. Did you mean "Deprecated"?
-      return 'error';
-    default:
-      return 'default';
-  }
-};
+// const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+//   switch (status.toLowerCase()) {
+//     case 'active':
+//       return 'success';
+//     case 'on hold':
+//       return 'warning';
+//     case 'closed':
+//       return 'default';
+//     case 'filled':
+//       return 'primary';
+//     case 'cancelled':
+//       return 'error';
+//     case 'priority':
+//       return 'secondary';
+//     case 'archived':
+//       return 'info';
+//     case 'depricated': // Note: This might be a typo. Did you mean "Deprecated"?
+//       return 'error';
+//     default:
+//       return 'default';
+//   }
+// };
 
 const RequirementsPage: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -324,6 +326,16 @@ const RequirementsPage: React.FC = () => {
                     <Typography variant="body2" color="textSecondary">
                       ID: {requirement.id}
                     </Typography>
+                    <Chip
+                      icon={React.createElement(getDomainIcon(requirement.domain.name))}
+                      label={requirement.domain.name}
+                      size="small"
+                      style={{
+                        backgroundColor: getDomainColor(requirement.domain.name),
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
+                    />
                     <Typography 
                       variant="body2" 
                       style={{
@@ -364,10 +376,14 @@ const RequirementsPage: React.FC = () => {
                       {requirement.location.name}
                     </Typography>
                     <Chip
+                      icon={React.createElement(getStatusIcon(requirement.status.name))}
                       label={requirement.status.name}
                       size="small"
-                      style={{ marginTop: '5px' }}
-                      color={getStatusColor(requirement.status.name)}
+                      style={{
+                        backgroundColor: getStatusColor(requirement.status.name),
+                        color: 'white',
+                        fontWeight: 'bold',
+                      }}
                     />
                   </Box>
                 </CardContent>
@@ -394,15 +410,29 @@ const RequirementsPage: React.FC = () => {
                 Requirement Details
               </Typography>
               <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
+              <Box display="flex" alignItems="center" mb={2}>
+                  <Chip
+                    icon={React.createElement(getDomainIcon(selectedRequirement.domain.name))}
+                    label={selectedRequirement.domain.name}
+                    style={{
+                      backgroundColor: getDomainColor(selectedRequirement.domain.name),
+                      color: 'white',
+                      fontWeight: 'bold',
+                    }}
+                  />
+              </Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="body1">
                   <strong>Created:</strong> {new Date(selectedRequirement.created_at).toLocaleString()}
                 </Typography>
                 <Chip
+                  icon={React.createElement(getStatusIcon(selectedRequirement.status.name))}
                   label={selectedRequirement.status.name}
-                  size="small"
-                  style={{ marginTop: '5px' }}
-                  color={getStatusColor(selectedRequirement.status.name)}
+                  style={{
+                    backgroundColor: getStatusColor(selectedRequirement.status.name),
+                    color: 'white',
+                    fontWeight: 'bold',
+                  }}
                 />
               </Box>
               <Typography variant="body1" paragraph>

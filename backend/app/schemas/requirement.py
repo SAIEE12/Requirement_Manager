@@ -35,6 +35,13 @@ class StatusBase(BaseModel):
     class Config:
         from_attributes = True
 
+class DomainBase(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
 
 class RequirementBase(BaseModel):
     description: str
@@ -64,6 +71,7 @@ class Requirement(RequirementBase):
     location: LocationBase
     client: ClientBase
     status: StatusBase
+    domain: DomainBase
     days_open: Optional[int] = None
     comments: Optional[List[Comment]]
 

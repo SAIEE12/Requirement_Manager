@@ -8,6 +8,11 @@ interface Status {
   name: string;
 }
 
+interface Domain {
+  id: number;
+  name: string;
+}
+
 export interface RequirementComment {
   id: number;
   content: string;
@@ -28,6 +33,7 @@ export interface Requirement {
   location: Location;
   notes?: string;
   status: Status;
+  domain: Domain;
   comments?: RequirementComment[];
   created_at: string; 
   days_open: number; 
