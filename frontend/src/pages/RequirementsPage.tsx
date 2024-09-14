@@ -27,6 +27,10 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -212,253 +216,297 @@ const RequirementsPage: React.FC = () => {
   }
 
   return (
-    <Container>
-      {selectedRequirement ? (
-        <>
-          <Button startIcon={<ArrowBackIcon />} onClick={handleBackToList} style={{ marginBottom: '20px' }}>
-            Back to Requirements List
-          </Button>
-          <Typography variant="h4" gutterBottom>
-            Requirement Details
-          </Typography>
-          <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
-            <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
-            <Typography variant="body1" paragraph>
-              <strong>Description:</strong> {selectedRequirement.description}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Client:</strong> {selectedRequirement.client.name}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
-            </Typography>
-            <Typography variant="body1">
-              <strong>Location:</strong> {selectedRequirement.location.name}
-            </Typography>
-            <Typography variant="body1" paragraph>
-              <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
-            </Typography>
-          </Paper>
-
-          <Typography variant="h5" gutterBottom>
-            Comments
-          </Typography>
-          <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
-            <List>
-              {comments.map((comment, index) => (
-                <React.Fragment key={comment.id}>
-                  <ListItem>
-                    <ListItemText
-                      primary={comment.content}
-                      secondary={`${comment.username} | ${new Date(comment.created_at).toLocaleString()}`}
-                    />
-                  </ListItem>
-                  {index < comments.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-            <Box display="flex" mt={2}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddComment}
-                disabled={!newComment.trim()}
-                style={{ marginLeft: '10px' }}
-              >
-                Add Comment
-              </Button>
-            </Box>
-          </Paper>
-        </>
-      ) : (
-        <>
-          <Typography variant="h4" gutterBottom>
-            Requirement Management
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-            style={{ marginBottom: '20px' }}
-          >
-            Add New Requirement
-          </Button>
-          {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
-          
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <FormControl style={{ minWidth: 200 }}>
-              <InputLabel>Filter by Client</InputLabel>
-              <Select
-                value={filterClient}
-                onChange={(e) => setFilterClient(e.target.value as string)}
-              >
-                <MenuItem value="">All Clients</MenuItem>
-                {clients.map((client) => (
-                  <MenuItem key={client.id} value={client.id.toString()}>
-                    {client.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ minWidth: 200 }}>
-              <InputLabel>Filter by Location</InputLabel>
-              <Select
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value as string)}
-              >
-                <MenuItem value="">All Locations</MenuItem>
-                {locations.map((location) => (
-                  <MenuItem key={location.id} value={location.id.toString()}>
-                    {location.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Client</TableCell>
-                  <TableCell>Experience (Years)</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredRequirements.map((requirement) => (
-                  <TableRow key={requirement.id} onClick={() => handleRequirementClick(requirement)} style={{ cursor: 'pointer' }}>
-                    <TableCell>{requirement.id}</TableCell>
-                    <TableCell>{requirement.description.length > 50 ? `${requirement.description.substring(0, 50)}...` : requirement.description}</TableCell>
-                    <TableCell>{requirement.client.name}</TableCell>
-                    <TableCell>{`${requirement.experience_min} - ${requirement.experience_max}`}</TableCell>
-                    <TableCell>{requirement.location.name}</TableCell>
-                    <TableCell>
-                      <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-            <DialogTitle>{editingRequirement ? 'Edit Requirement' : 'Add New Requirement'}</DialogTitle>
-            <DialogContent>
-              <Box component="form" noValidate autoComplete="off">
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  name="description"
-                  label="Description"
-                  type="text"
-                  fullWidth
-                  required
-                  multiline
-                  rows={4}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  error={isSubmitted && !formData.description.trim()}
-                  helperText={isSubmitted && !formData.description.trim() ? 'Description is required' : ''}
-                />
-                <TextField
-                  select
-                  margin="dense"
-                  name="client_id"
-                  label="Client"
-                  fullWidth
-                  required
-                  value={formData.client_id}
-                  onChange={handleInputChange}
-                  error={isSubmitted && !formData.client_id}
-                  helperText={isSubmitted && !formData.client_id ? 'Client is required' : ''}
+    <Container maxWidth="xl">
+      <Typography variant="h4" gutterBottom>
+        Requirement Management
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+        onClick={() => handleOpenDialog()}
+        style={{ marginBottom: '20px' }}
+      >
+        Add New Requirement
+      </Button>
+      {error && <Alert severity="error" style={{ marginBottom: '20px' }}>{error}</Alert>}
+      
+      <Grid container spacing={3}>
+        {/* Left side - Requirements List */}
+        
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} style={{ padding: '20px', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+            <Box display="flex" justifyContent="space-between" mb={2}>
+              <FormControl style={{ minWidth: 200 }}>
+                <InputLabel>Filter by Client</InputLabel>
+                <Select
+                  value={filterClient}
+                  onChange={(e) => setFilterClient(e.target.value as string)}
                 >
+                  <MenuItem value="">All Clients</MenuItem>
                   {clients.map((client) => (
                     <MenuItem key={client.id} value={client.id.toString()}>
                       {client.name}
                     </MenuItem>
                   ))}
-                </TextField>
-                <TextField
-                  margin="dense"
-                  name="experience_min"
-                  label="Minimum Experience"
-                  type="number"
-                  fullWidth
-                  required
-                  value={formData.experience_min}
-                  onChange={handleInputChange}
-                  error={isSubmitted && !formData.experience_min}
-                  helperText={isSubmitted && !formData.experience_min ? 'Minimum experience is required' : ''}
-                />
-                <TextField
-                  margin="dense"
-                  name="experience_max"
-                  label="Maximum Experience"
-                  type="number"
-                  fullWidth
-                  required
-                  value={formData.experience_max}
-                  onChange={handleInputChange}
-                  error={isSubmitted && !formData.experience_max}
-                  helperText={isSubmitted && !formData.experience_max ? 'Maximum experience is required' : ''}
-                />
-                <TextField
-                  select
-                  margin="dense"
-                  name="location_id"
-                  label="Location"
-                  fullWidth
-                  required
-                  value={formData.location_id}
-                  onChange={handleInputChange}
-                  error={isSubmitted && !formData.location_id}
-                  helperText={isSubmitted && !formData.location_id ? 'Location is required' : ''}
+                </Select>
+              </FormControl>
+              <FormControl style={{ minWidth: 200 }}>
+                <InputLabel>Filter by Location</InputLabel>
+                <Select
+                  value={filterLocation}
+                  onChange={(e) => setFilterLocation(e.target.value as string)}
                 >
+                  <MenuItem value="">All Locations</MenuItem>
                   {locations.map((location) => (
                     <MenuItem key={location.id} value={location.id.toString()}>
                       {location.name}
                     </MenuItem>
                   ))}
-                </TextField>
-                <TextField
-                  margin="dense"
-                  name="notes"
-                  label="Notes"
-                  type="text"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                />
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleSubmit} color="primary">
-                {editingRequirement ? 'Update' : 'Add'}
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </>
-      )}
+                </Select>
+              </FormControl>
+            </Box>
+  
+            <Box flexGrow={1} overflow="auto">
+            {filteredRequirements.map((requirement) => (
+              <Card 
+                key={requirement.id}
+                raised 
+                style={{ 
+                  cursor: 'pointer', 
+                  marginBottom: '10px',
+                  transition: 'box-shadow 0.3s',
+                  backgroundColor: selectedRequirement?.id === requirement.id ? '#e3f2fd' : 'white',
+                  height: '150px',
+                  position: 'relative',
+                }}
+                onClick={() => handleRequirementClick(requirement)}
+                sx={{
+                  '&:hover': {
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardContent style={{ height: '100%', overflow: 'hidden' }}>
+                  <Typography 
+                    variant="body2" 
+                    color="textSecondary" 
+                    style={{ 
+                      position: 'absolute', 
+                      top: '10px', 
+                      right: '10px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {requirement.client.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    ID: {requirement.id}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    style={{
+                      marginTop: '10px',
+                      marginBottom: '10px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {requirement.description}
+                  </Typography>
+                  <Typography variant="body2">
+                    Experience: {requirement.experience_min} - {requirement.experience_max} years
+                  </Typography>
+                  <Typography variant="body2">
+                    Location: {requirement.location.name}
+                  </Typography>
+                </CardContent>
+                <CardActions style={{ position: 'absolute', bottom: 0, right: 0 }}>
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }} size="small">
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }} size="small">
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
+            ))}
+          </Box>
+          </Paper>
+        </Grid>
+  
+        {/* Right side - Requirement Details */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} style={{ padding: '20px', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+            {selectedRequirement ? (
+              <>
+                <Typography variant="h5" gutterBottom>
+                  Requirement Details
+                </Typography>
+                <Typography variant="h6">ID: {selectedRequirement.id}</Typography>
+                <Typography variant="body1" paragraph>
+                  <strong>Description:</strong> {selectedRequirement.description}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Client:</strong> {selectedRequirement.client.name}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Experience:</strong> {selectedRequirement.experience_min} - {selectedRequirement.experience_max} years
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Location:</strong> {selectedRequirement.location.name}
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  <strong>Notes:</strong> {selectedRequirement.notes || 'N/A'}
+                </Typography>
+  
+                <Typography variant="h6" gutterBottom>
+                  Comments
+                </Typography>
+                <List>
+                  {comments.map((comment, index) => (
+                    <React.Fragment key={comment.id}>
+                      <ListItem>
+                        <ListItemText
+                          primary={comment.content}
+                          secondary={`${comment.username} | ${new Date(comment.created_at).toLocaleString()}`}
+                        />
+                      </ListItem>
+                      {index < comments.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+                <Box display="flex" mt={2}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Add Comment
+                  </Button>
+                </Box>
+              </>
+            ) : (
+              <Typography variant="h6" color="textSecondary" style={{ textAlign: 'center', marginTop: '20px' }}>
+                Select a requirement to view details
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+  
+      {/* Dialog for adding/editing requirements */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingRequirement ? 'Edit Requirement' : 'Add New Requirement'}</DialogTitle>
+        <DialogContent>
+          <Box component="form" noValidate autoComplete="off">
+            <TextField
+              autoFocus
+              margin="dense"
+              name="description"
+              label="Description"
+              type="text"
+              fullWidth
+              required
+              multiline
+              rows={4}
+              value={formData.description}
+              onChange={handleInputChange}
+              error={isSubmitted && !formData.description.trim()}
+              helperText={isSubmitted && !formData.description.trim() ? 'Description is required' : ''}
+            />
+            <TextField
+              select
+              margin="dense"
+              name="client_id"
+              label="Client"
+              fullWidth
+              required
+              value={formData.client_id}
+              onChange={handleInputChange}
+              error={isSubmitted && !formData.client_id}
+              helperText={isSubmitted && !formData.client_id ? 'Client is required' : ''}
+            >
+              {clients.map((client) => (
+                <MenuItem key={client.id} value={client.id.toString()}>
+                  {client.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              margin="dense"
+              name="experience_min"
+              label="Minimum Experience"
+              type="number"
+              fullWidth
+              required
+              value={formData.experience_min}
+              onChange={handleInputChange}
+              error={isSubmitted && !formData.experience_min}
+              helperText={isSubmitted && !formData.experience_min ? 'Minimum experience is required' : ''}
+            />
+            <TextField
+              margin="dense"
+              name="experience_max"
+              label="Maximum Experience"
+              type="number"
+              fullWidth
+              required
+              value={formData.experience_max}
+              onChange={handleInputChange}
+              error={isSubmitted && !formData.experience_max}
+              helperText={isSubmitted && !formData.experience_max ? 'Maximum experience is required' : ''}
+            />
+            <TextField
+              select
+              margin="dense"
+              name="location_id"
+              label="Location"
+              fullWidth
+              required
+              value={formData.location_id}
+              onChange={handleInputChange}
+              error={isSubmitted && !formData.location_id}
+              helperText={isSubmitted && !formData.location_id ? 'Location is required' : ''}
+            >
+              {locations.map((location) => (
+                <MenuItem key={location.id} value={location.id.toString()}>
+                  {location.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              margin="dense"
+              name="notes"
+              label="Notes"
+              type="text"
+              fullWidth
+              multiline
+              rows={4}
+              value={formData.notes}
+              onChange={handleInputChange}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleSubmit} color="primary">
+            {editingRequirement ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
