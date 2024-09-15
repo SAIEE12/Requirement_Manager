@@ -31,11 +31,18 @@ def get_requirements(db: Session, skip: int = 0, limit: int = 100):
         joinedload(Requirement.status),
         joinedload(Requirement.comments).joinedload(Comment.user)
     ).offset(skip).limit(limit).all()
-    
+
+    current_time = datetime.now()
     for requirement in requirements:
         for comment in requirement.comments:
             comment.username = comment.user.username
-    
+        
+        # Calculate days_open
+        if requirement.created_at:
+            requirement.days_open = (current_time - requirement.created_at.replace(tzinfo=None)).days
+        else:
+            requirement.days_open = None
+
     return requirements
 
 def create_requirement(db: Session, requirement: RequirementCreate):

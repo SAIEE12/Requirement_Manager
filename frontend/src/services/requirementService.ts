@@ -35,25 +35,41 @@ export interface Requirement {
   status: Status;
   domain: Domain;
   comments?: RequirementComment[];
-  created_at: string; 
-  days_open: number; 
+  created_at: string;
+  days_open: number;
+  priority?: string;
+  expected_start_date?: string;
+  expected_end_date?: string;
+  required_resources?: number;
 }
 
 export interface RequirementCreate {
   description: string;
   client_id: number;
+  domain_id: number;
+  status_id: number;
   experience_min: number;
   experience_max: number;
   location_id: number;
+  priority?: string;
+  expected_start_date?: string;
+  expected_end_date?: string;
+  required_resources?: number;
   notes?: string;
 }
 
 export interface RequirementUpdate {
   description?: string;
   client_id?: number;
+  domain_id?: number;
+  status_id?: number;
   experience_min?: number;
   experience_max?: number;
   location_id?: number;
+  priority?: string;
+  expected_start_date?: string;
+  expected_end_date?: string;
+  required_resources?: number;
   notes?: string;
 }
 

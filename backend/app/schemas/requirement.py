@@ -75,8 +75,5 @@ class Requirement(RequirementBase):
     days_open: Optional[int] = None
     comments: Optional[List[Comment]]
 
-    def get_days_open(self) -> int:
-        return (datetime.now(self.created_at.tzinfo) - self.created_at).days
-
     class Config:
         from_attributes = True
