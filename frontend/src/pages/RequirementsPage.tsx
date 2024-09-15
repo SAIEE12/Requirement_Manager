@@ -346,11 +346,11 @@ const RequirementsPage: React.FC = () => {
                     transform: 'translateY(-4px)',
                     boxShadow: 3,
                   },
-                  position: 'relative', // Add this to position the action buttons
+                  position: 'relative',
                 }}
                 onClick={() => handleRequirementClick(requirement)}
               >
-                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, paddingBottom: '40px !important' }}> {/* Add padding at the bottom for action buttons */}
+                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, paddingBottom: '40px !important' }}>
                   <Grid container spacing={1} alignItems="center">
                     <Grid item xs={12} sm={8}>
                       <Box display="flex" alignItems="center" mb={0.5}>
@@ -406,15 +406,17 @@ const RequirementsPage: React.FC = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" fontSize="0.8rem">
-                        Exp: {requirement.experience_min} - {requirement.experience_max} yrs
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="caption" color="text.secondary" align="right" display="block">
-                        Open: {requirement.days_open !== null ? `${requirement.days_open} days` : 'N/A'}
-                      </Typography>
+                    <Grid item xs={12}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="body2" fontSize="0.8rem">
+                          Exp: {requirement.experience_min} - {requirement.experience_max} yrs
+                        </Typography>
+                        {requirement.status.name.toLowerCase() === 'active' && (
+                          <Typography variant="caption" color="text.secondary">
+                            Open: {requirement.days_open !== null ? `${requirement.days_open} days` : 'N/A'}
+                          </Typography>
+                        )}
+                      </Box>
                     </Grid>
                   </Grid>
                 </CardContent>
@@ -425,21 +427,21 @@ const RequirementsPage: React.FC = () => {
                     right: 5, 
                     opacity: 0.7, 
                     '&:hover': { opacity: 1 },
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Add a semi-transparent background
-                    borderRadius: '4px', // Round the corners
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '4px',
                   }}
                 >
                   <IconButton 
                     size="small" 
                     onClick={(e) => { e.stopPropagation(); handleOpenDialog(requirement); }}
-                    sx={{ padding: '4px' }} // Reduce padding to make buttons smaller
+                    sx={{ padding: '4px' }}
                   >
                     <EditIcon fontSize="small" />
                   </IconButton>
                   <IconButton 
                     size="small" 
                     onClick={(e) => { e.stopPropagation(); handleDelete(requirement.id); }}
-                    sx={{ padding: '4px' }} // Reduce padding to make buttons smaller
+                    sx={{ padding: '4px' }}
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
