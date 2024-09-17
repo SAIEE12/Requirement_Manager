@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { debounce } from 'lodash';
 import {
   Container,
   Typography,
@@ -145,6 +146,15 @@ const RequirementsPage: React.FC = () => {
     return differenceInDays(now, created);
   };
 
+  const fetchComments = useCallback(async (requirementId: number) => {
+    try {
+      const fetchedComments = await requirementService.getComments(requirementId);
+      setComments(fetchedComments);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    }
+  }, []);
+
   const handleOpenDialog = (requirement: Requirement | null = null) => {
     if (requirement) {
       setEditingRequirement(requirement);
@@ -241,17 +251,16 @@ const RequirementsPage: React.FC = () => {
     }
   };
 
-  const handleAddComment = async () => {
+  const handleAddComment = useCallback(async () => {
     if (!selectedRequirement || !newComment.trim()) return;
     try {
-      console.log('Adding comment from Page, ', newComment);
       const addedComment = await requirementService.addComment(selectedRequirement.id, newComment);
       setComments(prevComments => [...prevComments, addedComment]);
       setNewComment('');
     } catch (err) {
       console.error('Error adding comment:', err);
     }
-  };
+  }, [selectedRequirement, newComment]);
 
   const handleBackToList = () => {
     setSelectedRequirement(null);
