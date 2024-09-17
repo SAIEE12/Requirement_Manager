@@ -9,3 +9,18 @@ export interface Client {
     name: string;
     // Add other location properties as needed
   }
+
+  export interface Skill {
+    id: number;
+    name: string;
+  }
+  
+  export interface Domain {
+    id: number;
+    name: string;
+  }
+  
+  export interface Status {
+    id: number;
+    name: string;
+  }

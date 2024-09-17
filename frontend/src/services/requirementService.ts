@@ -1,7 +1,7 @@
 // src/services/requirementService.ts
 
 import { apiService } from './apiService';
-import { Client, Location } from '../types/types';
+import { Client, Location, Skill } from '../types/types';
 
 interface Status {
   id: number;
@@ -34,6 +34,7 @@ export interface Requirement {
   notes?: string;
   status: Status;
   domain: Domain;
+  skills: Skill[];
   comments?: RequirementComment[];
   created_at: string;
   days_open: number;
@@ -56,6 +57,7 @@ export interface RequirementCreate {
   expected_end_date?: string;
   required_resources?: number;
   notes?: string;
+  skill_ids: number[];
 }
 
 export interface RequirementUpdate {
@@ -120,5 +122,17 @@ export const requirementService = {
       console.error('requirementService: Error adding comment:', error);
       throw error;
     }
+  },
+
+  getSkills: async (): Promise<Skill[]> => {
+    return apiService.get<Skill[]>('/skills');
+  },
+  
+  getDomains: async (): Promise<Domain[]> => {
+    return apiService.get<Domain[]>('/domains');
+  },
+  
+  getStatuses: async (): Promise<Status[]> => {
+    return apiService.get<Status[]>('/statuses');
   },
 };
