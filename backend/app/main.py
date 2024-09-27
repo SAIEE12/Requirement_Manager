@@ -12,6 +12,36 @@ from app.api.endpoints import roles, users, auth, clients, domains, skills, loca
 from app.core.errors import AppException, app_exception_handler
 from app.middleware.logging import log_requests
 from app.core.config import settings
+from app.crud import role as role_crud
+from app.crud import user as user_crud
+from app.schemas.user import UserCreate
+from app.schemas.role import RoleCreate
+
+
+def create_default_admin(db: Session):
+    # Create admin role if it doesn't exist
+    admin_role = role_crud.get_role_by_name(db, "admin")
+    if not admin_role:
+        admin_role_create = RoleCreate(name="admin", description="Administrator role")
+        admin_role = role_crud.create_role(db, admin_role_create)
+        print("Admin role created.")
+    
+    # Check if admin user already exists
+    admin_user = user_crud.get_user_by_username(db, username="admin")
+    if not admin_user:
+        admin_user = UserCreate(
+            username="admin",
+            email="admin@example.com",
+            password="pass",
+            is_active=True,
+            is_superuser=True,
+            role_id=admin_role.id
+        )
+        user_crud.create_user(db, admin_user)
+        print("Default admin user created.")
+    else:
+        print("Admin user already exists.")
+
 
 def create_app():
     app = FastAPI(title=settings.PROJECT_NAME)
@@ -52,9 +82,14 @@ def create_app():
     # Create database tables
     Base.metadata.create_all(bind=engine)
 
+    with Session(engine) as db:
+        create_default_admin(db)
+
     return app
 
 app = create_app()
+
+
 
 
 @app.get("/")
