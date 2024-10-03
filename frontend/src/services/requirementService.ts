@@ -133,6 +133,6 @@ export const requirementService = {
   },
   
   getStatuses: async (): Promise<Status[]> => {
-    return apiService.get<Status[]>('/statuses');
+    return apiService.get<Status[]>('/status');
   },
 };
