@@ -14,7 +14,7 @@ def create_requirement(requirement: RequirementCreate, db: Session = Depends(get
     return requirement_crud.create_requirement(db=db, requirement=requirement)
 
 @router.get("/", response_model=List[Requirement])
-def read_requirements(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_requirements(skip: int = 0, limit: int = 200, db: Session = Depends(get_db)):
     requirements = requirement_crud.get_requirements(db, skip=skip, limit=limit)
     return requirements
 

@@ -5,7 +5,7 @@ from datetime import datetime
 
 def populate_locations(db: Session):
     locations = [
-        {"name": "Bengaluru", "country": "India", "description": "Silicon Valley of India"},
+        {"name": "Bangalore", "country": "India", "description": "Silicon Valley of India"},
         {"name": "Hyderabad", "country": "India", "description": "City of Pearls"},
         {"name": "Noida", "country": "India", "description": "Planned city in NCR"},
         {"name": "Chennai", "country": "India", "description": "Detroit of India"},
@@ -13,7 +13,9 @@ def populate_locations(db: Session):
         {"name": "Singapore", "country": "Singapore", "description": "Lion City"},
         {"name": "Penang", "country": "Malaysia", "description": "Pearl of the Orient"},
         {"name": "Ho Chi Minh City", "country": "Vietnam", "description": "Formerly Saigon"},
-        {"name": "California", "country": "USA", "description": "Golden State"}
+        {"name": "California", "country": "USA", "description": "Golden State"}, 
+        {"name": "N/A", "country": "none", "description": "none"}
+
     ]
 
     for location_data in locations:

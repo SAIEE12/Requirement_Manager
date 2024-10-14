@@ -22,7 +22,7 @@ def get_requirement(db: Session, requirement_id: int):
     
     return requirement
 
-def get_requirements(db: Session, skip: int = 0, limit: int = 100):
+def get_requirements(db: Session, skip: int = 0, limit: int = 200):
     requirements = db.query(Requirement).options(
         joinedload(Requirement.skills),
         joinedload(Requirement.location),

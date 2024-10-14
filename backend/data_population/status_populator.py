@@ -11,7 +11,8 @@ def populate_statuses(db: Session):
         {"name": "Filled", "description": "The position for this requirement has been filled", "is_active": True},
         {"name": "Cancelled", "description": "The requirement has been cancelled and is no longer valid", "is_active": True},
         {"name": "Archived", "description": "An old status that is no longer in use", "is_active": False},
-        {"name": "Deprecated", "description": "A status that has been phased out", "is_active": False}
+        {"name": "Deprecated", "description": "A status that has been phased out", "is_active": False},
+        {"name": "N/A", "description": "Status not found", "is_active": False}
     ]
 
     for status_data in statuses:

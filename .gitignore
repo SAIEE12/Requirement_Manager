@@ -26,6 +26,11 @@ __pycache__/
 Thumbs.db
 *.db
 
+myenv
+
+#Ignore Excel Files
+**/Excel_code/
+/home/shashank/Bitsilica/Requirement_Manager/Excel_code
 
 # Frontend ignores
 # dependencies
